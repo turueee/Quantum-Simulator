@@ -8,11 +8,12 @@ using namespace std;
 template <class T>
 class TComplex
 {
-protected:
+public:
   T re;
   T im;
-public:
+
   TComplex();
+  TComplex(T num);
   TComplex(T re_, T im_);
   TComplex(const TComplex& p);
 
@@ -23,10 +24,10 @@ public:
   void SetIm(T im_);
 
 
-  TComplex operator+ (const TComplex<T>& p);
-  TComplex operator- (const TComplex<T>& p);
-  TComplex operator* (const TComplex<T>& p);
-  TComplex operator/ (const TComplex<T>& p);
+  TComplex operator+ (const TComplex<T>& p) const;
+  TComplex operator- (const TComplex<T>& p) const;
+  TComplex operator* (const TComplex<T>& p) const;
+  TComplex operator/ (const TComplex<T>& p) const;
 
   TComplex operator+= (const TComplex<T>& p);
   TComplex operator-= (const TComplex<T>& p);
@@ -57,6 +58,13 @@ inline TComplex<T>::TComplex()
 {
   re = 0;
   im = 0;
+}
+
+template<class T>
+inline TComplex<T>::TComplex(T num)
+{
+    re = num;
+    im = 0;
 }
 
 
@@ -105,28 +113,28 @@ inline void TComplex<T>::SetIm(T im_)
 
 
 template<class T>
-inline TComplex<T> TComplex<T>::operator+(const TComplex<T>& p)
+inline TComplex<T> TComplex<T>::operator+(const TComplex<T>& p) const
 {
   return TComplex(re + p.re, im + p.im);
 }
 
 
 template<class T>
-inline TComplex<T> TComplex<T>::operator-(const TComplex<T>& p)
+inline TComplex<T> TComplex<T>::operator-(const TComplex<T>& p) const
 {
   return TComplex(re - p.re, im - p.im);
 }
 
 
 template<class T>
-inline TComplex<T> TComplex<T>::operator*(const TComplex<T>& p)
+inline TComplex<T> TComplex<T>::operator*(const TComplex<T>& p) const
 {
   return TComplex(re * p.re - im * p.im, re * p.im + im * p.re);
 }
 
 
 template<class T>
-inline TComplex<T> TComplex<T>::operator/(const TComplex<T>& p)
+inline TComplex<T> TComplex<T>::operator/(const TComplex<T>& p) const
 {
   if (p.im == 0 && p.re == 0)
     throw("Division by zero");
@@ -306,13 +314,40 @@ inline void TComplex<T>::PrintTrig()
 
 
 template<typename D>
-inline ostream& operator<<(ostream& o, TComplex<D>& b)
+inline ostream& operator<<(ostream& o, const TComplex<D>& b)
 {
-  if (b.im >= 0)
-    o << b.re << " + " << b.im << "i" << endl;
-  else
-    o << b.re << " - " << -b.im << "i" << endl;
-  return o;
+    if (b.re != 0)
+        o << b.re;
+
+    if (b.im == 1) {
+        if (b.re != 0)
+            o << " + i";
+        else
+            o << "i";
+    }
+    else if (b.im == -1) {
+        if (b.re != 0)
+            o << " - i";
+        else
+            o << "-i";
+    }
+    else if (b.im > 0) {
+        if (b.re != 0)
+            o << " + " << b.im << "i";
+        else
+            o << b.im << "i";
+    }
+    else if (b.im < 0) {
+        if (b.re != 0)
+            o << " - " << -b.im << "i";
+        else
+            o << b.im << "i";
+    }
+    else if (b.re == 0) {
+        o << "0";
+    }
+
+    return o;
 }
 
 

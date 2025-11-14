@@ -1,25 +1,22 @@
 #include <iostream>
 #include <cstddef>
 #include "TString.h"
-#include "TStack.h"
-#include "TQueue.h"
-#include "TMultyStack.h"
-#include "TList.h"
+#include "Quantum.h"
 
 
 
 int main()
 {
-	TMultyStack<char> d(3);
-	d.Push(0, 'a');
-	d.Push(0, 'b');
-	d.Push(0, 'c');
-	d.Push(1, 'f');
-	d.Push(1, 'g');
-	d.Push(1, 'h');
-	d.Push(2, 'j');
-	cout << d<<endl;
-	d.Push(1, 'k');
-	cout << d;
-	return 0;
+	Quantum a(0);
+	Quantum b(0);
+	Quantum c(0);
+	Quantum d;
+	d = a * b * c;
+	std::cout << d;
+	d.H();
+	std::cout << d;
+	d.CNOT(0, 1);
+	std::cout << d;
+	d.CNOT(1, 2);
+	std::cout << d;
 }
