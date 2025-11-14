@@ -25,15 +25,15 @@ public:
 	TComplex<double> operator[](size_t index) const;
 	size_t statescount() const;
 
-	Quantum& X();//Гейт NOT
-	Quantum& Y();//Гейт Паули У
-	Quantum& Z();//Гейт Паули Z
-	Quantum& H();//Гейт Адамара
-	Quantum& S();
-	Quantum& Rx(double angle);//Поворот на angle радиан покруг оси X
-	Quantum& Ry(double angle);//Поворот на angle радиан покруг оси Y
-	Quantum& Rz(double angle);//Поворот на angle радиан покруг оси Z
-	Quantum& P(double angle);//Фазовый сдвиг
+	Quantum& X(size_t qbit);//Гейт NOT
+	Quantum& Y(size_t qbit);//Гейт Паули У
+	Quantum& Z(size_t qbit);//Гейт Паули Z
+	Quantum& H(size_t qbit);//Гейт Адамара
+	Quantum& S(size_t qbit);
+	Quantum& Rx(size_t qbit,double angle);//Поворот на angle радиан покруг оси X
+	Quantum& Ry(size_t qbit,double angle);//Поворот на angle радиан покруг оси Y
+	Quantum& Rz(size_t qbit,double angle);//Поворот на angle радиан покруг оси Z
+	Quantum& P(size_t qbit,double angle);//Фазовый сдвиг
 	Quantum& CNOT(int controll, int controlled);
 	
 

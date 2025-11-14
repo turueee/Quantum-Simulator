@@ -11,12 +11,10 @@ int main()
 	Quantum b(0);
 	Quantum c(0);
 	Quantum d;
-	d = a * b * c;
+	d = a;
 	std::cout << d;
-	d.H();
+	d.Ry(1,3);
 	std::cout << d;
-	d.CNOT(0, 1);
-	std::cout << d;
-	d.CNOT(1, 2);
+	d.Rz(1, 0.5);
 	std::cout << d;
 }
