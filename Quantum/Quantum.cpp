@@ -76,21 +76,17 @@ Quantum& Quantum::X(size_t qbit)
 	I[1][1] = 1;
 
 	TMatrix<TComplex<double>> fullMatrix;
-	if (count - 1 == qbit) {
+	if (count - 1 == qbit)
 		fullMatrix = X;
-	}
-	else {
+	else
 		fullMatrix = I;
-	}
 
-
-	for (int pos = count - 2; pos >= 0; --pos) {
-		if (pos == qbit) {
-			fullMatrix = X.TenzorMul(fullMatrix);
-		}
-		else {
-			fullMatrix = I.TenzorMul(fullMatrix);
-		}
+	for (int pos = count - 2; pos >= 0; --pos)
+	{
+		if (pos == qbit)
+			fullMatrix = fullMatrix.TenzorMul(X);
+		else
+			fullMatrix = fullMatrix.TenzorMul(I);
 	}
 
 	*this = fullMatrix * (*this);
@@ -113,21 +109,17 @@ Quantum& Quantum::Y(size_t qbit)
 	I[1][1] = 1;
 
 	TMatrix<TComplex<double>> fullMatrix;
-	if (count - 1 == qbit) {
+	if (count - 1 == qbit)
 		fullMatrix = Y;
-	}
-	else {
+	else
 		fullMatrix = I;
-	}
 
-
-	for (int pos = count - 2; pos >= 0; --pos) {
-		if (pos == qbit) {
-			fullMatrix = Y.TenzorMul(fullMatrix);
-		}
-		else {
-			fullMatrix = I.TenzorMul(fullMatrix);
-		}
+	for (int pos = count - 2; pos >= 0; --pos)
+	{
+		if (pos == qbit)
+			fullMatrix = fullMatrix.TenzorMul(Y);
+		else
+			fullMatrix = fullMatrix.TenzorMul(I);
 	}
 
 	*this = fullMatrix * (*this);
@@ -150,21 +142,17 @@ Quantum& Quantum::Z(size_t qbit)
 	I[1][1] = 1;
 
 	TMatrix<TComplex<double>> fullMatrix;
-	if (count - 1 == qbit) {
+	if (count - 1 == qbit)
 		fullMatrix = Z;
-	}
-	else {
+	else
 		fullMatrix = I;
-	}
 
-
-	for (int pos = count - 2; pos >= 0; --pos) {
-		if (pos == qbit) {
-			fullMatrix = Z.TenzorMul(fullMatrix);
-		}
-		else {
-			fullMatrix = I.TenzorMul(fullMatrix);
-		}
+	for (int pos = count - 2; pos >= 0; --pos)
+	{
+		if (pos == qbit)
+			fullMatrix = fullMatrix.TenzorMul(Z);
+		else
+			fullMatrix = fullMatrix.TenzorMul(I);
 	}
 
 	*this = fullMatrix * (*this);
@@ -188,21 +176,17 @@ Quantum& Quantum::H(size_t qbit)
 
 	TMatrix<TComplex<double>> fullMatrix;
 
-	if (count - 1 == qbit) {
+	if (count - 1 == qbit) 
 		fullMatrix = H;
-	}
-	else {
+	else
 		fullMatrix = I;
-	}
 
-
-	for (int pos = count - 2; pos >= 0; --pos) {
-		if (pos == qbit) {
-			fullMatrix = H.TenzorMul(fullMatrix);
-		}
-		else {
-			fullMatrix = I.TenzorMul(fullMatrix);
-		}
+	for (int pos = count - 2; pos >= 0; --pos) 
+	{
+		if (pos == qbit)
+			fullMatrix = fullMatrix.TenzorMul(H);
+		else
+			fullMatrix = fullMatrix.TenzorMul(I);
 	}
 
 	*this = fullMatrix * (*this);
@@ -225,21 +209,17 @@ Quantum& Quantum::S(size_t qbit)
 	I[1][1] = 1;
 
 	TMatrix<TComplex<double>> fullMatrix;
-	if (count - 1 == qbit) {
+	if (count - 1 == qbit)
 		fullMatrix = S;
-	}
-	else {
+	else
 		fullMatrix = I;
-	}
 
-
-	for (int pos = count - 2; pos >= 0; --pos) {
-		if (pos == qbit) {
-			fullMatrix = S.TenzorMul(fullMatrix);
-		}
-		else {
-			fullMatrix = I.TenzorMul(fullMatrix);
-		}
+	for (int pos = count - 2; pos >= 0; --pos)
+	{
+		if (pos == qbit)
+			fullMatrix = fullMatrix.TenzorMul(S);
+		else
+			fullMatrix = fullMatrix.TenzorMul(I);
 	}
 
 	*this = fullMatrix * (*this);
@@ -262,21 +242,17 @@ Quantum& Quantum::Rx(size_t qbit,double angle)
 	I[1][1] = 1;
 
 	TMatrix<TComplex<double>> fullMatrix;
-	if (count - 1 == qbit) {
+	if (count - 1 == qbit)
 		fullMatrix = R;
-	}
-	else {
+	else
 		fullMatrix = I;
-	}
 
-
-	for (int pos = count - 2; pos >= 0; --pos) {
-		if (pos == qbit) {
-			fullMatrix = R.TenzorMul(fullMatrix);
-		}
-		else {
-			fullMatrix = I.TenzorMul(fullMatrix);
-		}
+	for (int pos = count - 2; pos >= 0; --pos)
+	{
+		if (pos == qbit)
+			fullMatrix = fullMatrix.TenzorMul(R);
+		else
+			fullMatrix = fullMatrix.TenzorMul(I);
 	}
 
 	*this = fullMatrix * (*this);
@@ -299,21 +275,17 @@ Quantum& Quantum::Ry(size_t qbit,double angle)
 	I[1][1] = 1;
 
 	TMatrix<TComplex<double>> fullMatrix;
-	if (count - 1 == qbit) {
+	if (count - 1 == qbit)
 		fullMatrix = R;
-	}
-	else {
+	else
 		fullMatrix = I;
-	}
 
-
-	for (int pos = count - 2; pos >= 0; --pos) {
-		if (pos == qbit) {
-			fullMatrix = R.TenzorMul(fullMatrix);
-		}
-		else {
-			fullMatrix = I.TenzorMul(fullMatrix);
-		}
+	for (int pos = count - 2; pos >= 0; --pos)
+	{
+		if (pos == qbit)
+			fullMatrix = fullMatrix.TenzorMul(R);
+		else
+			fullMatrix = fullMatrix.TenzorMul(I);
 	}
 
 	*this = fullMatrix * (*this);
@@ -336,21 +308,17 @@ Quantum& Quantum::Rz(size_t qbit,double angle)
 	I[1][1] = 1;
 
 	TMatrix<TComplex<double>> fullMatrix;
-	if (count - 1 == qbit) {
+	if (count - 1 == qbit)
 		fullMatrix = R;
-	}
-	else {
+	else
 		fullMatrix = I;
-	}
 
-
-	for (int pos = count - 2; pos >= 0; --pos) {
-		if (pos == qbit) {
-			fullMatrix = R.TenzorMul(fullMatrix);
-		}
-		else {
-			fullMatrix = I.TenzorMul(fullMatrix);
-		}
+	for (int pos = count - 2; pos >= 0; --pos)
+	{
+		if (pos == qbit)
+			fullMatrix = fullMatrix.TenzorMul(R);
+		else
+			fullMatrix = fullMatrix.TenzorMul(I);
 	}
 
 	*this = fullMatrix * (*this);
@@ -373,21 +341,17 @@ Quantum& Quantum::P(size_t qbit,double angle)
 	I[1][1] = 1;
 
 	TMatrix<TComplex<double>> fullMatrix;
-	if (count - 1 == qbit) {
+	if (count - 1 == qbit)
 		fullMatrix = P;
-	}
-	else {
+	else
 		fullMatrix = I;
-	}
 
-
-	for (int pos = count - 2; pos >= 0; --pos) {
-		if (pos == qbit) {
-			fullMatrix = P.TenzorMul(fullMatrix);
-		}
-		else {
-			fullMatrix = I.TenzorMul(fullMatrix);
-		}
+	for (int pos = count - 2; pos >= 0; --pos)
+	{
+		if (pos == qbit)
+			fullMatrix = fullMatrix.TenzorMul(P);
+		else
+			fullMatrix = fullMatrix.TenzorMul(I);
 	}
 
 	*this = fullMatrix * (*this);
