@@ -2,6 +2,7 @@
 
 #include <iostream>
 #include "TError.h"
+#include "TComplex.h"
 
 using namespace std;
 
@@ -33,10 +34,10 @@ public:
     vector<T>& operator[](int index);
     const vector<T>& operator[](int index) const;
 
-    template <class O>
-    friend ostream& operator<<(ostream& o, TMatrix<O>& t);
-    template <class I>
-    friend istream& operator>>(istream& i, TMatrix<I>& t);
+    template <class U>
+    friend ostream& operator<<(ostream& o, TMatrix<U>& t);
+    template <class U>
+    friend istream& operator>>(istream& i, TMatrix<U>& t);
 };
 
 template<class T>
@@ -205,8 +206,8 @@ inline const vector<T>& TMatrix<T>::operator[](int index) const
     return matrix[index];
 }
 
-template<typename O>
-inline ostream& operator<<(ostream& o, TMatrix<O>& t)
+template<typename U>
+inline ostream& operator<<(ostream& o, TMatrix<U>& t)
 {
     if (t.rows == 0 || t.columns == 0)
     {
@@ -228,8 +229,8 @@ inline ostream& operator<<(ostream& o, TMatrix<O>& t)
     return o;
 }
 
-template <typename I>
-inline istream& operator>>(istream& i, TMatrix<I>& t)
+template <typename U>
+inline istream& operator>>(istream& i, TMatrix<U>& t)
 {
     cout << "Enter the count of strings: ";
     cin >> t.rows;

@@ -14,6 +14,14 @@ Quantum::Quantum(size_t num)
 	count = 1;
 }
 
+Quantum::Quantum(const TComplex<double>& a, const TComplex<double>& b)
+{
+	if (a.AbsPow2() + b.AbsPow2() != 1)
+		throw "not qbit";
+	qbits = { TComplex<double>(a),TComplex<double>(b) };
+	count = 1;
+}
+
 Quantum::Quantum(const Quantum& other)
 {
 	count = other.count;
@@ -188,8 +196,9 @@ Quantum& Quantum::H(size_t qbit)
 		else
 			fullMatrix = fullMatrix.TenzorMul(I);
 	}
-
+	std::cout << fullMatrix;
 	*this = fullMatrix * (*this);
+
 	return *this;
 }
 

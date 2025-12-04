@@ -15,6 +15,7 @@ public:
 
 	Quantum();
 	Quantum(size_t num);
+	Quantum(const TComplex<double>& a, const TComplex<double>& b);
 	Quantum(const Quantum& other);
 	Quantum(Quantum&& other) noexcept;
 
@@ -33,7 +34,7 @@ public:
 	Quantum& Rx(size_t qbit,double angle);//Поворот на angle радиан покруг оси X
 	Quantum& Ry(size_t qbit,double angle);//Поворот на angle радиан покруг оси Y
 	Quantum& Rz(size_t qbit,double angle);//Поворот на angle радиан покруг оси Z
-	Quantum& P(size_t qbit,double angle);//Фазовый сдвиг
+	Quantum& P(size_t qbit,double angle);//Гейт фазы
 	Quantum& CNOT(int controll, int controlled);
 	
 
