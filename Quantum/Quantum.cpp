@@ -2,6 +2,7 @@
 #include <cmath>
 #include <chrono>
 #include <random>
+#include <numbers>
 
 Quantum::Quantum():qbits(),count(1){}
 
@@ -179,7 +180,7 @@ Quantum& Quantum::P(size_t qbit,double angle)
 	P[0] = 1;
 	P[1] = 0;
 	P[2] = 0;
-	P[3] = TComplex < double >(cos(angle), sin(angle));
+	P[3] = TComplex<double>(cos(angle), sin(angle));
 
 	operation(P, { qbit });
 	return *this;
@@ -193,6 +194,30 @@ Quantum& Quantum::CNOT(size_t controll, size_t controlled)
 	X[2] = 1;
 	X[3] = 0;
 	operation(X, { controll,controlled });
+
+	return *this;
+}
+
+Quantum& Quantum::CH(size_t controll, size_t controlled)
+{
+	std::vector<TComplex<double>> H(4);
+	H[0] = 1 / sqrt(2);
+	H[1] = 1 / sqrt(2);
+	H[2] = 1 / sqrt(2);
+	H[3] = -1 / sqrt(2);
+	operation(H, { controll,controlled });
+
+	return *this;
+}
+
+Quantum& Quantum::CP(size_t controll, size_t controlled, double angle)
+{
+	std::vector<TComplex<double>> P(4);
+	P[0] = 1;
+	P[1] = 0;
+	P[2] = 0;
+	P[3] = TComplex<double>(cos(angle), sin(angle));
+	operation(P, { controll,controlled });
 
 	return *this;
 }
@@ -285,4 +310,33 @@ Quantum operator*(const TMatrix<TComplex<double>>& matrix, const Quantum& vector
 		}
 	}
 	return res;
+}
+
+double QuantumAlgorithms::getQFTPhase(size_t distance)
+{
+	return (2.0 * std::acos(-1.0)) / std::pow(2, distance);
+}
+
+Quantum& QuantumAlgorithms::QFT(Quantum& object,size_t first,size_t last)
+{
+	for (size_t i = first; i < last+1; ++i)
+	{
+		object.H(i);
+		for (size_t j = i + 1; j < last+1; ++j)
+			object.CP(j,i, getQFTPhase(j-i));
+	}
+	return object;
+}
+
+Quantum& QuantumAlgorithms::IQFT(Quantum& object, size_t first, size_t last)
+{
+	for (int i = (int)last; i >= (int)first; --i)
+	{
+		for (int j = (int)last; j > i; --j)
+		{
+			object.CP(j, i, -getQFTPhase(j - i));
+		}
+		object.H(i);
+	}
+	return object;
 }

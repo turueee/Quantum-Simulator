@@ -36,6 +36,8 @@ public:
 	Quantum& Rz(size_t qbit,double angle);//Поворот на angle радиан покруг оси Z
 	Quantum& P(size_t qbit,double angle);//Гейт фазы
 	Quantum& CNOT(size_t controll, size_t controlled);
+	Quantum& CH(size_t controll, size_t controlled);
+	Quantum& CP(size_t controll, size_t controlled, double angle);
 	void operation(std::vector<TComplex<double>>& qop,std::vector<size_t> qbit);
 
 	std::vector<int> Measurment(size_t count_of_measurment);
@@ -44,4 +46,12 @@ public:
 	friend std::ostream& operator<<(std::ostream& out, const Quantum& other);
 private:
 	friend Quantum operator*(const TMatrix<TComplex<double>>& matrix,const Quantum& vector);
+};
+
+class QuantumAlgorithms
+{
+public:
+	static double getQFTPhase(size_t distance);
+	static Quantum& QFT(Quantum& object,size_t first,size_t last);
+	static Quantum& IQFT(Quantum& object, size_t first, size_t last);
 };

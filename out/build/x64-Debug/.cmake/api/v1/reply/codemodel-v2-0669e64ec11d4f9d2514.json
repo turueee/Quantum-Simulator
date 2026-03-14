@@ -1,0 +1,201 @@
+{
+	"configurations" : 
+	[
+		{
+			"directories" : 
+			[
+				{
+					"build" : ".",
+					"childIndexes" : 
+					[
+						1,
+						2,
+						3,
+						4,
+						5,
+						6
+					],
+					"jsonFile" : "directory-.-Debug-d0094a50bb2071803777.json",
+					"minimumCMakeVersion" : 
+					{
+						"string" : "3.5"
+					},
+					"projectIndex" : 0,
+					"source" : "."
+				},
+				{
+					"build" : "Main",
+					"jsonFile" : "directory-Main-Debug-ef3346be6ad0087c8be7.json",
+					"minimumCMakeVersion" : 
+					{
+						"string" : "3.5"
+					},
+					"parentIndex" : 0,
+					"projectIndex" : 0,
+					"source" : "Main",
+					"targetIndexes" : 
+					[
+						0
+					]
+				},
+				{
+					"build" : "String",
+					"jsonFile" : "directory-String-Debug-5397a37c0cd7405e10dd.json",
+					"minimumCMakeVersion" : 
+					{
+						"string" : "3.5"
+					},
+					"parentIndex" : 0,
+					"projectIndex" : 0,
+					"source" : "String",
+					"targetIndexes" : 
+					[
+						5
+					]
+				},
+				{
+					"build" : "Error",
+					"jsonFile" : "directory-Error-Debug-8d67781f5db7fb7b8e7b.json",
+					"minimumCMakeVersion" : 
+					{
+						"string" : "3.5"
+					},
+					"parentIndex" : 0,
+					"projectIndex" : 0,
+					"source" : "Error",
+					"targetIndexes" : 
+					[
+						2
+					]
+				},
+				{
+					"build" : "Matrix",
+					"jsonFile" : "directory-Matrix-Debug-b36d5918c082b258ba0f.json",
+					"minimumCMakeVersion" : 
+					{
+						"string" : "3.5"
+					},
+					"parentIndex" : 0,
+					"projectIndex" : 0,
+					"source" : "Matrix",
+					"targetIndexes" : 
+					[
+						3
+					]
+				},
+				{
+					"build" : "Complex",
+					"jsonFile" : "directory-Complex-Debug-558fa5a608fce78e9958.json",
+					"minimumCMakeVersion" : 
+					{
+						"string" : "3.5"
+					},
+					"parentIndex" : 0,
+					"projectIndex" : 0,
+					"source" : "Complex",
+					"targetIndexes" : 
+					[
+						1
+					]
+				},
+				{
+					"build" : "Quantum",
+					"jsonFile" : "directory-Quantum-Debug-d06bfcb381b29e78b6ad.json",
+					"minimumCMakeVersion" : 
+					{
+						"string" : "3.5"
+					},
+					"parentIndex" : 0,
+					"projectIndex" : 0,
+					"source" : "Quantum",
+					"targetIndexes" : 
+					[
+						4
+					]
+				}
+			],
+			"name" : "Debug",
+			"projects" : 
+			[
+				{
+					"directoryIndexes" : 
+					[
+						0,
+						1,
+						2,
+						3,
+						4,
+						5,
+						6
+					],
+					"name" : "QuantumSimulator",
+					"targetIndexes" : 
+					[
+						0,
+						1,
+						2,
+						3,
+						4,
+						5
+					]
+				}
+			],
+			"targets" : 
+			[
+				{
+					"directoryIndex" : 1,
+					"id" : "Application::@e4405d0c4cf2df57c995",
+					"jsonFile" : "target-Application-Debug-9a939edccc5b0de94c04.json",
+					"name" : "Application",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 5,
+					"id" : "Complex::@d07463b84940eb63e475",
+					"jsonFile" : "target-Complex-Debug-9ec692b1593ed6b0a8c9.json",
+					"name" : "Complex",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 3,
+					"id" : "Error::@5e029084f8b401b97d31",
+					"jsonFile" : "target-Error-Debug-7cd37fb8cef4e55a1e5d.json",
+					"name" : "Error",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 4,
+					"id" : "Matrix::@8f54aebd265510262963",
+					"jsonFile" : "target-Matrix-Debug-8dc6707e4aef553d97d4.json",
+					"name" : "Matrix",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 6,
+					"id" : "Quantum::@2f660c0a1350a191d9c7",
+					"jsonFile" : "target-Quantum-Debug-955f9fb6913a782db8cb.json",
+					"name" : "Quantum",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 2,
+					"id" : "String::@6304f020a56887f27159",
+					"jsonFile" : "target-String-Debug-302d8b3a35d594d567f8.json",
+					"name" : "String",
+					"projectIndex" : 0
+				}
+			]
+		}
+	],
+	"kind" : "codemodel",
+	"paths" : 
+	{
+		"build" : "C:/Users/turus/source/repos/turueee/Quantum-Simulator/out/build/x64-Debug",
+		"source" : "C:/Users/turus/source/repos/turueee/Quantum-Simulator"
+	},
+	"version" : 
+	{
+		"major" : 2,
+		"minor" : 8
+	}
+}
