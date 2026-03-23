@@ -1,27 +1,55 @@
 #include <iostream>
 #include <cstddef>
-#include "TString.h"
-#include "TComplex.h"
 #include "Quantum.h"
 
 
 
 int main() {
-	Quantum q8(1);
-	q8 = q8 * Quantum(0);
-	q8 = q8 * Quantum(0);
-	q8 = q8 * Quantum(0);
-	std::cout << q8 << std::endl;
+    // ТЕСТ 1: Сложение (1 + 2 = 3)
+    {
+        Quantum q(4);
+        q.X(0); 
+        q.X(3); 
+		std::cout << q << std::endl;
+        
+        QuantumAlgorithms::QFT(q, 0, 1);
+		std::cout << q << std::endl;
+        QuantumAlgorithms::Add(q, 0, 1, 2, 3);
+		std::cout << q << std::endl;
+        QuantumAlgorithms::IQFT(q, 0, 1);
+		std::cout << q << std::endl;
+    }
 
-	std::vector<int> v = q8.Measurment(1000);
-	for (size_t i = 0; i < v.size(); ++i)
-		std::cout << v[i] << ' ';
+    // ТЕСТ 2: Вычитание (3 - 1 = 2)
+    {
+        Quantum q(4);
+        q.X(0); q.X(1); 
+        q.X(2);         
+		std::cout << q << std::endl;
+        
+        QuantumAlgorithms::QFT(q, 0, 1);
+		std::cout << q << std::endl;
+        QuantumAlgorithms::Sub(q, 0, 1, 2, 3);
+		std::cout << q << std::endl;
+        QuantumAlgorithms::IQFT(q, 0, 1);
+		std::cout << q << std::endl;
+    }
 
-	q8.H(3);
+    // ТЕСТ 3: Переполнение (3 + 1 = 0 mod 4)
+    {
+        Quantum q(4);
+        q.X(0); q.X(1); 
+        q.X(2);  
+		std::cout << q << std::endl;       
+        
+        QuantumAlgorithms::QFT(q, 0, 1);
+		std::cout << q << std::endl;
+        QuantumAlgorithms::Add(q, 0, 1, 2, 3);
+		std::cout << q << std::endl;
+        QuantumAlgorithms::IQFT(q, 0, 1);
+        
+        std::cout << q << std::endl;
+    }
 
-	QuantumAlgorithms::QFT(q8, 0, 3);
-	std::cout << "QFT |1000>: " << q8 << std::endl;
-
-	QuantumAlgorithms::IQFT(q8, 0, 3);
-	std::cout << "IQFT |1000>: " << q8 << std::endl;
+    return 0;
 }

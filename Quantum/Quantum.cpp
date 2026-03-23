@@ -8,13 +8,9 @@ Quantum::Quantum():qbits(),count(1){}
 
 Quantum::Quantum(size_t num)
 {
-	if (num != 0 && num != 1)
-		throw;
-	if (num == 0)
-		qbits = { std::complex<double>(1.0),std::complex<double>(0.0) };
-	else
-		qbits = { std::complex<double>(0.0), std::complex<double>(1.0) };
-	count = 1;
+	count = num;
+	qbits.resize(1<<num,0);
+	qbits[0] = 1;
 }
 
 Quantum::Quantum(const std::complex<double>& a, const std::complex<double>& b)
@@ -175,7 +171,7 @@ Quantum& Quantum::Rz(size_t qbit,double angle)
 
 Quantum& Quantum::P(size_t qbit,double angle)
 {
-	std:vector<std::complex<double>> P(4);
+	std::vector<std::complex<double>> P(4);
 
 	P[0] = 1;
 	P[1] = 0;
@@ -228,14 +224,14 @@ void Quantum::operation(std::vector<std::complex<double>>& qop, std::vector<size
 	int s = 0;
 	if (qbit.size() == 1)
 	{
-		mask = std::pow(2, qbit[0]);
+		mask = 1<<qbit[0];
 		s = mask;
 	}
 
 	if (qbit.size() == 2)
 	{
-		s = std::pow(2, qbit[1]);
-		mask = std::pow(2, qbit[0]) + s;
+		s = 1<<qbit[1];
+		mask = (1 << qbit[0]) + s;
 	}
 
 	for (int i = 0; i < qbits.size(); ++i)
@@ -286,31 +282,45 @@ std::vector<int> Quantum::Measurment(size_t count_of_measurment)
 
 std::ostream& operator<<(std::ostream& out, const Quantum& other)
 {
-	out << "[";
-	for (size_t i = 0; i < other.statescount(); ++i) {
-		out << other[i];
-		if (i < other.statescount() - 1) {
-			out << "; ";
-		}
-	}
-	out << ">\n";
-	return out;
-}
+    const double epsilon = 1e-10;
+    out << "[";
 
-Quantum operator*(const TMatrix<std::complex<double>>& matrix, const Quantum& vector)
-{
-	Quantum res;
-	res.qbits.resize(matrix.GetRows(), std::complex<double>(0.0));
-	res.count = vector.count;
-
-	for (size_t i = 0; i < matrix.GetRows(); ++i)
+    for (size_t i = 0; i < other.statescount(); ++i)
 	{
-		for (size_t j = 0; j < matrix.GetColumns(); ++j)
+        std::complex<double> val = other[i];
+        double re = val.real();
+        double im = val.imag();
+
+        if (std::abs(re) < epsilon) re = 0.0;
+        if (std::abs(im) < epsilon) im = 0.0;
+
+        if (re == 0.0 && im == 0.0) 
 		{
-			res.qbits[i] += matrix[i][j] * vector[j];
-		}
-	}
-	return res;
+            out << "0";
+        } 
+        else 
+		{
+            if (re != 0.0) 
+			{
+                out << re;
+            }
+
+            if (im != 0.0) {
+                if (re != 0.0 && im > 0) out << "+";
+                
+                if (im == 1.0) out << "i";
+                else if (im == -1.0) out << "-i";
+                else out << im << "i";
+            }
+        }
+
+        if (i < other.statescount() - 1) {
+            out << "; ";
+        }
+    }
+
+    out << "]\n";
+    return out;
 }
 
 double QuantumAlgorithms::getQFTPhase(size_t distance)
@@ -318,26 +328,60 @@ double QuantumAlgorithms::getQFTPhase(size_t distance)
 	return (2.0 * std::acos(-1.0)) / std::pow(2, distance);
 }
 
-Quantum& QuantumAlgorithms::QFT(Quantum& object,size_t first,size_t last)
+Quantum& QuantumAlgorithms::QFT(Quantum& object,int first,int last)
 {
-	for (int i = last; i >= 0; --i)
+	for (int i = last; i >= first; --i)
 	{
 		object.H(i);
-		for (int j = i - 1; j >= 0; --j)
-			object.CP(j,i, getQFTPhase(j-i+1));
+		for (int j = i - 1; j >= first; --j)
+			object.CP(j,i, getQFTPhase(i-j+1));
 	}
 	return object;
 }
 
 Quantum& QuantumAlgorithms::IQFT(Quantum& object, size_t first, size_t last)
 {
-	for (int i = (int)last; i >= (int)first; --i)
+	for (int i = first; i <= last; ++i)
 	{
-		for (int j = (int)last; j > i; --j)
+		for (int j = first; j < i; ++j)
 		{
-			object.CP(j, i, -getQFTPhase(j - i));
+			object.CP(j, i, -getQFTPhase(i-j+1));
 		}
 		object.H(i);
+	}
+	return object;
+}
+
+Quantum &QuantumAlgorithms::Add(Quantum &object, size_t ffirst, size_t flast, size_t first, size_t last)
+{
+    if (ffirst-flast != first-last)
+		throw std::system_error();
+
+	int n = last-first+1;
+
+	for (int i = n-1;i>=0;--i)
+	{
+		for (int j = i;j>=0;--j)
+		{
+			object.CP(first+j,ffirst+i,getQFTPhase(i-j+1));
+		}
+	}
+	return object;
+}
+
+Quantum &QuantumAlgorithms::Sub(Quantum &object, size_t ffirst, size_t flast, size_t first, size_t last)
+{
+        if (ffirst-flast != first-last)
+		throw std::system_error();
+
+	int n = last-first+1;
+
+	for (int i = n-1;i>=0;--i)
+	{
+		for (int j = i;j>=0;--j)
+		{
+			object.CP(first+j,ffirst+i,-getQFTPhase(i-j+1));
+		}
 	}
 	return object;
 }
