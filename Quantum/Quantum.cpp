@@ -11,17 +11,17 @@ Quantum::Quantum(size_t num)
 	if (num != 0 && num != 1)
 		throw;
 	if (num == 0)
-		qbits = { TComplex<double>(1.0),TComplex<double>(0.0) };
+		qbits = { std::complex<double>(1.0),std::complex<double>(0.0) };
 	else
-		qbits = { TComplex<double>(0.0),TComplex<double>(1.0) };
+		qbits = { std::complex<double>(0.0), std::complex<double>(1.0) };
 	count = 1;
 }
 
-Quantum::Quantum(const TComplex<double>& a, const TComplex<double>& b)
+Quantum::Quantum(const std::complex<double>& a, const std::complex<double>& b)
 {
-	if (a.AbsPow2() + b.AbsPow2() != 1)
+	if (std::abs(a) * std::abs(a) + std::abs(b) * std::abs(b) != 1)
 		throw "not qbit";
-	qbits = { TComplex<double>(a),TComplex<double>(b) };
+	qbits = { std::complex<double>(a),std::complex<double>(b) };
 	count = 1;
 }
 
@@ -56,12 +56,12 @@ Quantum& Quantum::operator=(const Quantum& other)
 	return *this;
 }
 
-TComplex<double>& Quantum::operator[](size_t index)
+std::complex<double>& Quantum::operator[](size_t index)
 {
 	return qbits[index];
 }
 
-TComplex<double> Quantum::operator[](size_t index) const
+std::complex<double> Quantum::operator[](size_t index) const
 {
 	return qbits[index];
 }
@@ -73,7 +73,7 @@ size_t Quantum::statescount() const
 
 Quantum& Quantum::X(size_t qbit)
 {
-	std::vector<TComplex<double>> X(4);
+	std::vector<std::complex<double>> X(4);
 
 	X[0] = 0;
 	X[1] = 1;
@@ -85,11 +85,11 @@ Quantum& Quantum::X(size_t qbit)
 
 Quantum& Quantum::Y(size_t qbit)
 {
-	std::vector<TComplex<double>> Y(4);
+	std::vector<std::complex<double>> Y(4);
 
 	Y[0] = 0;
-	Y[1] = TComplex<double>(0.0, -1.0);
-	Y[2] = TComplex<double>(0.0, 1.0);
+	Y[1] = std::complex<double>(0.0, -1.0);
+	Y[2] = std::complex<double>(0.0, 1.0);
 	Y[3] = 0;
 	operation(Y, { qbit });
 	return *this;
@@ -97,7 +97,7 @@ Quantum& Quantum::Y(size_t qbit)
 
 Quantum& Quantum::Z(size_t qbit)
 {
-	std::vector<TComplex<double>> Z(4);
+	std::vector<std::complex<double>> Z(4);
 
 	Z[0] = 1;
 	Z[1] = 0;
@@ -110,7 +110,7 @@ Quantum& Quantum::Z(size_t qbit)
 
 Quantum& Quantum::H(size_t qbit)
 {
-	std::vector<TComplex<double>> H(4);
+	std::vector<std::complex<double>> H(4);
 
 	H[0] = 1 / sqrt(2);
 	H[1] = 1 / sqrt(2);
@@ -123,12 +123,12 @@ Quantum& Quantum::H(size_t qbit)
 
 Quantum& Quantum::S(size_t qbit)
 {
-	std::vector<TComplex<double>> S(4);
+	std::vector<std::complex<double>> S(4);
 
 	S[0] = 1;
 	S[1] = 0;
 	S[2] = 0;
-	S[3] = TComplex <double>(0.0,1.0) ;
+	S[3] = std::complex <double>(0.0,1.0) ;
 
 	operation(S, { qbit });
 	return *this;
@@ -136,11 +136,11 @@ Quantum& Quantum::S(size_t qbit)
 
 Quantum& Quantum::Rx(size_t qbit,double angle)
 {
-	std::vector<TComplex<double>> R(4);
+	std::vector<std::complex<double>> R(4);
 
 	R[0] = cos(angle/2.0);
-	R[1] = TComplex<double>(0.0, -sin(angle/2.0));
-	R[2] = TComplex<double>(0.0, -sin(angle / 2.0));
+	R[1] = std::complex<double>(0.0, -sin(angle/2.0));
+	R[2] = std::complex<double>(0.0, -sin(angle / 2.0));
 	R[3] = cos(angle / 2.0);
 
 	operation(R, { qbit });
@@ -149,7 +149,7 @@ Quantum& Quantum::Rx(size_t qbit,double angle)
 
 Quantum& Quantum::Ry(size_t qbit,double angle)
 {
-	std::vector<TComplex<double>> R(4);
+	std::vector<std::complex<double>> R(4);
 
 	R[0] = cos(angle / 2.0);
 	R[1] = -sin(angle/2.0);
@@ -162,12 +162,12 @@ Quantum& Quantum::Ry(size_t qbit,double angle)
 
 Quantum& Quantum::Rz(size_t qbit,double angle)
 {
-	std::vector<TComplex<double>> R(4);
+	std::vector<std::complex<double>> R(4);
 
-	R[0] = TComplex < double >(cos(angle/2),sin(angle/2));
+	R[0] = std::complex < double >(cos(angle/2),sin(angle/2));
 	R[1] = 0;
 	R[2] = 0;
-	R[3] = TComplex < double >(cos(angle / 2), sin(angle / 2));
+	R[3] = std::complex < double >(cos(angle / 2), sin(angle / 2));
 
 	operation(R, { qbit });
 	return *this;
@@ -175,12 +175,12 @@ Quantum& Quantum::Rz(size_t qbit,double angle)
 
 Quantum& Quantum::P(size_t qbit,double angle)
 {
-	std:vector<TComplex<double>> P(4);
+	std:vector<std::complex<double>> P(4);
 
 	P[0] = 1;
 	P[1] = 0;
 	P[2] = 0;
-	P[3] = TComplex<double>(cos(angle), sin(angle));
+	P[3] = std::complex<double>(cos(angle), sin(angle));
 
 	operation(P, { qbit });
 	return *this;
@@ -188,7 +188,7 @@ Quantum& Quantum::P(size_t qbit,double angle)
 
 Quantum& Quantum::CNOT(size_t controll, size_t controlled)
 {
-	std::vector<TComplex<double>> X(4);
+	std::vector<std::complex<double>> X(4);
 	X[0] = 0;
 	X[1] = 1;
 	X[2] = 1;
@@ -200,7 +200,7 @@ Quantum& Quantum::CNOT(size_t controll, size_t controlled)
 
 Quantum& Quantum::CH(size_t controll, size_t controlled)
 {
-	std::vector<TComplex<double>> H(4);
+	std::vector<std::complex<double>> H(4);
 	H[0] = 1 / sqrt(2);
 	H[1] = 1 / sqrt(2);
 	H[2] = 1 / sqrt(2);
@@ -212,17 +212,17 @@ Quantum& Quantum::CH(size_t controll, size_t controlled)
 
 Quantum& Quantum::CP(size_t controll, size_t controlled, double angle)
 {
-	std::vector<TComplex<double>> P(4);
+	std::vector<std::complex<double>> P(4);
 	P[0] = 1;
 	P[1] = 0;
 	P[2] = 0;
-	P[3] = TComplex<double>(cos(angle), sin(angle));
+	P[3] = std::complex<double>(cos(angle), sin(angle));
 	operation(P, { controll,controlled });
 
 	return *this;
 }
 
-void Quantum::operation(std::vector<TComplex<double>>& qop, std::vector<size_t> qbit)
+void Quantum::operation(std::vector<std::complex<double>>& qop, std::vector<size_t> qbit)
 {
 	int mask = 0;
 	int s = 0;
@@ -242,8 +242,8 @@ void Quantum::operation(std::vector<TComplex<double>>& qop, std::vector<size_t> 
 	{
 		if ((i & mask) == mask)
 		{
-			TComplex <double> phi1 = qbits[i - s];
-			TComplex<double> phi2 = qbits[i];
+			std::complex <double> phi1 = qbits[i - s];
+			std::complex<double> phi2 = qbits[i];
 			qbits[i - s] = qop[0] * phi1 + qop[1] * phi2;
 			qbits[i] = qop[2] * phi1 + qop[3] * phi2;
 		}
@@ -259,13 +259,14 @@ std::vector<int> Quantum::Measurment(size_t count_of_measurment)
 	std::vector<double> distribution(states_count + 1);
 
 	distribution[0] = 0.0;
-	for (size_t i = 0; i < states_count; ++i) {
-		distribution[i + 1] = distribution[i] + qbits[i].AbsPow2();
+	for (size_t i = 0; i < states_count; ++i) 
+	{
+		distribution[i + 1] = distribution[i] + std::abs(qbits[i])*std::abs(qbits[i]);
 	}
 
-	for (size_t i = 0; i < distribution.size(); ++i)
-		std::cout << distribution[i] << ' ';
-	std::cout << endl;
+	//for (size_t i = 0; i < distribution.size(); ++i)
+		//std::cout << distribution[i] << ' ';
+	//std::cout << endl;
 
 	std::mt19937_64 gen(std::random_device{}());
 	std::uniform_real_distribution<double> dis(0.0, 1.0);
@@ -296,10 +297,10 @@ std::ostream& operator<<(std::ostream& out, const Quantum& other)
 	return out;
 }
 
-Quantum operator*(const TMatrix<TComplex<double>>& matrix, const Quantum& vector)
+Quantum operator*(const TMatrix<std::complex<double>>& matrix, const Quantum& vector)
 {
 	Quantum res;
-	res.qbits.resize(matrix.GetRows(), TComplex<double>(0.0));
+	res.qbits.resize(matrix.GetRows(), std::complex<double>(0.0));
 	res.count = vector.count;
 
 	for (size_t i = 0; i < matrix.GetRows(); ++i)
@@ -319,11 +320,11 @@ double QuantumAlgorithms::getQFTPhase(size_t distance)
 
 Quantum& QuantumAlgorithms::QFT(Quantum& object,size_t first,size_t last)
 {
-	for (size_t i = first; i < last+1; ++i)
+	for (int i = last; i >= 0; --i)
 	{
 		object.H(i);
-		for (size_t j = i + 1; j < last+1; ++j)
-			object.CP(j,i, getQFTPhase(j-i));
+		for (int j = i - 1; j >= 0; --j)
+			object.CP(j,i, getQFTPhase(j-i+1));
 	}
 	return object;
 }

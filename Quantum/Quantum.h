@@ -2,28 +2,28 @@
 
 #include <iostream>
 #include <vector>
+#include <complex>
 #include "TError.h"
-#include "TComplex.h"
 #include "TMatrix.h"
 
 
 class Quantum
 {
 public:
-	std::vector<TComplex<double>> qbits;
+	std::vector<std::complex<double>> qbits;
 	size_t count;
 
 	Quantum();
 	Quantum(size_t num);
-	Quantum(const TComplex<double>& a, const TComplex<double>& b);
+	Quantum(const std::complex<double>& a, const std::complex<double>& b);
 	Quantum(const Quantum& other);
 	Quantum(Quantum&& other) noexcept;
 
 	
 	Quantum operator*(const Quantum& other);
 	Quantum& operator=(const Quantum& other);
-	TComplex<double>& operator[](size_t index);
-	TComplex<double> operator[](size_t index) const;
+	std::complex<double>& operator[](size_t index);
+	std::complex<double> operator[](size_t index) const;
 	size_t statescount() const;
 
 	Quantum& X(size_t qbit);//Гейт NOT
@@ -38,14 +38,14 @@ public:
 	Quantum& CNOT(size_t controll, size_t controlled);
 	Quantum& CH(size_t controll, size_t controlled);
 	Quantum& CP(size_t controll, size_t controlled, double angle);
-	void operation(std::vector<TComplex<double>>& qop,std::vector<size_t> qbit);
+	void operation(std::vector<std::complex<double>>& qop, std::vector<size_t> qbit);
 
 	std::vector<int> Measurment(size_t count_of_measurment);
 	
 
 	friend std::ostream& operator<<(std::ostream& out, const Quantum& other);
 private:
-	friend Quantum operator*(const TMatrix<TComplex<double>>& matrix,const Quantum& vector);
+	friend Quantum operator*(const TMatrix<std::complex<double>>& matrix, const Quantum& vector);
 };
 
 class QuantumAlgorithms
@@ -54,4 +54,5 @@ public:
 	static double getQFTPhase(size_t distance);
 	static Quantum& QFT(Quantum& object,size_t first,size_t last);
 	static Quantum& IQFT(Quantum& object, size_t first, size_t last);
+
 };
