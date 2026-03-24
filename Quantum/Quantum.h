@@ -20,6 +20,7 @@ public:
 	
 	Quantum operator*(const Quantum& other);
 	Quantum& operator=(const Quantum& other);
+	Quantum& operator=(const int condition);
 	std::complex<double>& operator[](size_t index);
 	std::complex<double> operator[](size_t index) const;
 	size_t statescount() const;

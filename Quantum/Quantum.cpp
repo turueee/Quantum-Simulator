@@ -52,6 +52,17 @@ Quantum& Quantum::operator=(const Quantum& other)
 	return *this;
 }
 
+Quantum &Quantum::operator=(const int condition)
+{
+    if (condition>=qbits.size())
+	{
+		throw " ";
+	}
+	for (size_t i = 0;i<qbits.size();++i)
+		qbits[i] = 0;
+	qbits[condition] = 1;
+}
+
 std::complex<double>& Quantum::operator[](size_t index)
 {
 	return qbits[index];
