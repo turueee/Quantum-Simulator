@@ -60,7 +60,8 @@ Quantum &Quantum::operator=(const int condition)
 	}
 	for (size_t i = 0;i<qbits.size();++i)
 		qbits[i] = 0;
-	qbits[condition] = 1;
+	qbits[condition] = std::complex<double>(1.0,0.0);
+	return *this;
 }
 
 std::complex<double>& Quantum::operator[](size_t index)
@@ -336,7 +337,7 @@ std::ostream& operator<<(std::ostream& out, const Quantum& other)
 
 double QuantumAlgorithms::getQFTPhase(size_t distance)
 {
-	return (2.0 * std::acos(-1.0)) / std::pow(2, distance);
+	return (std::acos(-1.0)) / (1 << (--distance));
 }
 
 Quantum& QuantumAlgorithms::QFT(Quantum& object,int first,int last)
@@ -380,6 +381,32 @@ Quantum &QuantumAlgorithms::Add(Quantum &object, size_t ffirst, size_t flast, si
 	return object;
 }
 
+Quantum& Quantum::Add(Quantum& object,size_t first, size_t last, size_t num)
+{
+	n = last - first + ;
+	for (int i = 0; i < n; ++i)
+	{
+		object.P(i,num * getQFTPhase(i + 1));
+	}
+	return object;
+}
+
+static Quantum& AddMod(Quantum& object,size_t first, size_t last, size_t add,size_t mod)
+{
+	Add(object,first,last,add);
+	Sub(object,first,last,mod);
+	IQFT(object,first,last);
+	object.X(last);
+	QFT(object,first,last);
+	Add(object,first,last,mod);
+	Sub(object,first,last,add);
+	IQFT(object,first,last);
+	object.X(last);
+	QFT(object,first,last);
+	Add(object,first,last,add);
+	return object;
+}
+
 Quantum &QuantumAlgorithms::Sub(Quantum &object, size_t ffirst, size_t flast, size_t first, size_t last)
 {
         if (ffirst-flast != first-last)
@@ -393,6 +420,16 @@ Quantum &QuantumAlgorithms::Sub(Quantum &object, size_t ffirst, size_t flast, si
 		{
 			object.CP(first+j,ffirst+i,-getQFTPhase(i-j+1));
 		}
+	}
+	return object;
+}
+
+Quantum& Quantum::Sub(Quantum& object,size_t first, size_t last, size_t num)
+{
+	n = last - first + ;
+	for (int i = 0; i < n; ++i)
+	{
+		object.P(i,-num * getQFTPhase(i + 1));
 	}
 	return object;
 }

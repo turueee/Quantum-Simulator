@@ -51,6 +51,9 @@ public:
 	static double getQFTPhase(size_t distance);
 	static Quantum& QFT(Quantum& object,int first,int last);
 	static Quantum& IQFT(Quantum& object, size_t first, size_t last);
-	static Quantum& Add(Quantum& object,size_t ffirst,size_t flast,size_t first,size_t last);
-	static Quantum& Sub(Quantum& object,size_t ffirst,size_t flast,size_t first,size_t last);
+	static Quantum& Add(Quantum& object, size_t ffirst, size_t flast, size_t first, size_t last);
+	static Quantum& Add(Quantum& object, size_t first, size_t last, size_t num);
+	static Quantum& AddMod(Quantum& object, size_t first,size_t last, size_t add,size_t mod);
+	static Quantum& Sub(Quantum& object, size_t ffirst, size_t flast, size_t first, size_t last);
+	static Quantum& Sub(Quantum& object, size_t first, size_t last, size_t num);
 };
