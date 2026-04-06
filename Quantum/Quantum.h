@@ -53,7 +53,8 @@ public:
 	static Quantum& IQFT(Quantum& object, size_t first, size_t last);
 	static Quantum& Add(Quantum& object, size_t ffirst, size_t flast, size_t first, size_t last);
 	static Quantum& Add(Quantum& object, size_t first, size_t last, size_t num);
-	static Quantum& AddMod(Quantum& object, size_t first,size_t last, size_t add,size_t mod,size_t acille);
+	static Quantum& CAdd(Quantum& object, size_t first, size_t last, size_t num, size_t controlled);
+	static Quantum& AddMod(Quantum& object, size_t first,size_t last, size_t add,size_t mod, size_t ancilla);
 	static Quantum& Sub(Quantum& object, size_t ffirst, size_t flast, size_t first, size_t last);
 	static Quantum& Sub(Quantum& object, size_t first, size_t last, size_t num);
 };

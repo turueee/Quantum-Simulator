@@ -4,18 +4,24 @@
 
 
 
-int main() 
-{
-    Quantum qbit(3);
-    std::cout<<qbit<<std::endl;
-    qbit.X(1);
-    std::cout<<qbit<<std::endl;
-    QuantumAlgorithms::QFT(qbit,1,2);
-    std::cout<<qbit<<std::endl;
-    QuantumAlgorithms::AddMod(qbit,1,2,1,2,0);
-    //QuantumAlgorithms::Sub(qbit,1,2,1);
-    std::cout<<qbit<<std::endl;
-    QuantumAlgorithms::IQFT(qbit,1,2);
-    std::cout<<qbit<<std::endl;
+int main() {
+    Quantum q(3); 
+
+    size_t first = 0;
+    size_t last = 2;
+    size_t ancilla = 3;
+    
+    size_t add = 2;
+    size_t mod = 3;
+    
+    q.X(1); 
+    std::cout<<q<<std::endl;
+    QuantumAlgorithms::QFT(q, first, last);
+    std::cout<<q<<std::endl;
+    
+    QuantumAlgorithms::AddMod(q, first, last, add, mod, ancilla);
+    std::cout<<q<<std::endl;
+    QuantumAlgorithms::IQFT(q, first, last);
+    std::cout<<q<<std::endl;
     return 0;
 }

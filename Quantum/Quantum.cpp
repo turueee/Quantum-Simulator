@@ -391,18 +391,28 @@ Quantum& QuantumAlgorithms::Add(Quantum& object,size_t first, size_t last, size_
 	return object;
 }
 
-Quantum& QuantumAlgorithms::AddMod(Quantum& object,size_t first, size_t last, size_t add,size_t mod,size_t acille)
+Quantum &QuantumAlgorithms::CAdd(Quantum &object, size_t first, size_t last, size_t num, size_t controlled)
+{
+    int n = last - first + 1;
+	for (int i = 0; i < n; ++i)
+	{
+		object.CP(first + i,controlled,num * getQFTPhase(i + 1));
+	}
+	return object;
+}
+
+Quantum& QuantumAlgorithms::AddMod(Quantum& object,size_t first, size_t last, size_t add,size_t mod,size_t ancilla)
 {
 	Add(object,first,last,add);
 	Sub(object,first,last,mod);
 	IQFT(object,first,last);
-	object.CNOT(acille,{last});
+	object.CNOT(ancilla,{last});
 	QFT(object,first,last);
-	Add(object,first,last,mod);
+	CAdd(object,first,last,mod,ancilla);//???
 	Sub(object,first,last,add);
 	IQFT(object,first,last);
 	object.X(last);
-	object.CNOT(acille,{last});
+	object.CNOT(ancilla,{last});
 	object.X(last);
 	QFT(object,first,last);
 	Add(object,first,last,add);
