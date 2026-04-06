@@ -381,26 +381,28 @@ Quantum &QuantumAlgorithms::Add(Quantum &object, size_t ffirst, size_t flast, si
 	return object;
 }
 
-Quantum& Quantum::Add(Quantum& object,size_t first, size_t last, size_t num)
+Quantum& QuantumAlgorithms::Add(Quantum& object,size_t first, size_t last, size_t num)
 {
-	n = last - first + ;
+	int n = last - first + 1;
 	for (int i = 0; i < n; ++i)
 	{
-		object.P(i,num * getQFTPhase(i + 1));
+		object.P(first+i,num * getQFTPhase(i + 1));
 	}
 	return object;
 }
 
-static Quantum& AddMod(Quantum& object,size_t first, size_t last, size_t add,size_t mod)
+Quantum& QuantumAlgorithms::AddMod(Quantum& object,size_t first, size_t last, size_t add,size_t mod,size_t acille)
 {
 	Add(object,first,last,add);
 	Sub(object,first,last,mod);
 	IQFT(object,first,last);
-	object.X(last);
+	object.CNOT(acille,{last});
 	QFT(object,first,last);
 	Add(object,first,last,mod);
 	Sub(object,first,last,add);
 	IQFT(object,first,last);
+	object.X(last);
+	object.CNOT(acille,{last});
 	object.X(last);
 	QFT(object,first,last);
 	Add(object,first,last,add);
@@ -409,7 +411,7 @@ static Quantum& AddMod(Quantum& object,size_t first, size_t last, size_t add,siz
 
 Quantum &QuantumAlgorithms::Sub(Quantum &object, size_t ffirst, size_t flast, size_t first, size_t last)
 {
-        if (ffirst-flast != first-last)
+    if (ffirst-flast != first-last)
 		throw std::system_error();
 
 	int n = last-first+1;
@@ -424,12 +426,12 @@ Quantum &QuantumAlgorithms::Sub(Quantum &object, size_t ffirst, size_t flast, si
 	return object;
 }
 
-Quantum& Quantum::Sub(Quantum& object,size_t first, size_t last, size_t num)
+Quantum& QuantumAlgorithms::Sub(Quantum& object,size_t first, size_t last, size_t num)
 {
-	n = last - first + ;
+	int n = last - first + 1;
 	for (int i = 0; i < n; ++i)
 	{
-		object.P(i,-num * getQFTPhase(i + 1));
+		object.P(first + i,-static_cast<double>(num) * getQFTPhase(i + 1));
 	}
 	return object;
 }
