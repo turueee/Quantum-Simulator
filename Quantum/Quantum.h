@@ -34,10 +34,12 @@ public:
 	Quantum& Ry(size_t qbit,double angle);//������� �� angle ������ ������ ��� Y
 	Quantum& Rz(size_t qbit,double angle);//������� �� angle ������ ������ ��� Z
 	Quantum& P(size_t qbit,double angle);//���� ����
-	Quantum& CNOT(size_t controll, size_t controlled);
-	Quantum& CH(size_t controll, size_t controlled);
-	Quantum& CP(size_t controll, size_t controlled, double angle);
-	void operation(std::vector<std::complex<double>>& qop, std::vector<size_t> qbit);
+	Quantum& CNOT(size_t controlled, std::vector<size_t> controll);
+	Quantum& CH(size_t controlled, std::vector<size_t> controll);
+	Quantum& CP(size_t controlled, std::vector<size_t> controll, double angle);
+	Quantum& SWAP(size_t first, size_t second);
+	Quantum& CSWAP(size_t first, size_t second, size_t controll);
+	void operation(const std::vector<std::complex<double>>& qop, size_t target, const std::vector<size_t>& controls);
 
 	std::vector<int> Measurment(size_t count_of_measurment);
 	
@@ -53,8 +55,12 @@ public:
 	static Quantum& IQFT(Quantum& object, size_t first, size_t last);
 	static Quantum& Add(Quantum& object, size_t ffirst, size_t flast, size_t first, size_t last);
 	static Quantum& Add(Quantum& object, size_t first, size_t last, size_t num);
-	static Quantum& CAdd(Quantum& object, size_t first, size_t last, size_t num, size_t controlled);
-	static Quantum& AddMod(Quantum& object, size_t first,size_t last, size_t add,size_t mod, size_t ancilla);
+	static Quantum& CAdd(Quantum& object, size_t first, size_t last, size_t num, std::vector<size_t> controll);
+	static Quantum& CAddMod(Quantum& object, size_t first,size_t last, size_t add,size_t mod, size_t ancilla, std::vector<size_t> controll);
 	static Quantum& Sub(Quantum& object, size_t ffirst, size_t flast, size_t first, size_t last);
 	static Quantum& Sub(Quantum& object, size_t first, size_t last, size_t num);
+	static Quantum& CSub(Quantum& object, size_t first, size_t last, size_t num, std::vector<size_t> controll);
+	static Quantum& MulMod(Quantum& object, size_t first, size_t last, size_t xfirst, size_t xlast, size_t a, size_t N, size_t ancilla, size_t controll);
+	static Quantum& СSWAP(Quantum& object, size_t first, size_t last, size_t afirst, size_t alast, size_t controll);
+	static Quantum& CUA(Quantum& object, size_t first, size_t last, size_t afirst, size_t alast, size_t controll);
 };
