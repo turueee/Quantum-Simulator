@@ -51,6 +51,7 @@ class QuantumAlgorithms
 {
 public:
 	static double getQFTPhase(size_t distance);
+	static size_t modInverse(size_t a, size_t N);
 	static Quantum& QFT(Quantum& object,int first,int last);
 	static Quantum& IQFT(Quantum& object, size_t first, size_t last);
 	static Quantum& Add(Quantum& object, size_t ffirst, size_t flast, size_t first, size_t last);
@@ -61,6 +62,6 @@ public:
 	static Quantum& Sub(Quantum& object, size_t first, size_t last, size_t num);
 	static Quantum& CSub(Quantum& object, size_t first, size_t last, size_t num, std::vector<size_t> controll);
 	static Quantum& MulMod(Quantum& object, size_t first, size_t last, size_t xfirst, size_t xlast, size_t a, size_t N, size_t ancilla, size_t controll);
+	static Quantum& Ua_Gate(Quantum &object, size_t xfirst, size_t xlast, size_t afirst, size_t alast, size_t a, size_t N, size_t ancilla, size_t controll);
 	static Quantum& СSWAP(Quantum& object, size_t first, size_t last, size_t afirst, size_t alast, size_t controll);
-	static Quantum& CUA(Quantum& object, size_t first, size_t last, size_t afirst, size_t alast, size_t controll);
 };

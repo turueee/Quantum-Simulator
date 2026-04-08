@@ -5,56 +5,55 @@
 
 int main() {
     try {
-        // Параметры системы
         size_t n = 4;           // разрядность N (13)
-        size_t x_start = 0;     // регистр x: 0, 1, 2, 3
-        size_t b_start = 4;     // регистр b: 4, 5, 6, 7, 8 (n+1 кубит)
-        size_t ancilla = 9;     // анцилла
+        size_t x_start = 0;     // основной регистр x
+        size_t aux_start = 4;   // вспомогательный регистр (n+1 кубит)
+        size_t ancilla = 9;     // анцилла для CAddMod
         size_t control = 10;    // управляющий кубит
-        
-        Quantum circuit(11); // Всего 11 кубитов (2n+3)
 
-        // 1. Инициализация состояний
-        // x = 3 (состояние |3>)
-        circuit = 3; 
-        
-        // Включаем управляющий кубит (бит 10)
-        // Индекс состояния будет 3 + (1 << 10) = 1027
+        Quantum circuit(11);    // 2n + 3 кубита
+
+        // 1. Инициализация
+        // x = 3, control = 1, aux = 0
         circuit = 3 + (1 << control); 
 
-        std::cout << "Начальное состояние (x=3, control=1, b=0):" << std::endl;
+        std::cout << "--- Запуск теста Ua Gate ---" << std::endl;
+        std::cout << "Вход: x=3, a=2, N=13, control=1" << std::endl;
 
-        // 2. Выполнение умножения: (3 * 2) mod 13
         size_t a = 2;
         size_t N = 13;
-        
-        // В твоем MulMod: (object, b_first, b_last, x_first, x_last, a, N, ancilla, control)
-        QuantumAlgorithms::MulMod(circuit, b_start, b_start + n, x_start, x_start + n - 1, a, N, ancilla, control);
 
-        std::cout << "После MulMod:" << std::endl;
+        // 2. Вызов Ua_Gate (собранного по Рис. 7)
+        // Внутри него: MulMod(a) -> CSwap -> MulModInverse(a_inv)
+        QuantumAlgorithms::Ua_Gate(circuit, x_start, x_start + n - 1, aux_start, aux_start + n, a, N, ancilla, control);
 
         // 3. Измерение
         auto results = circuit.Measurment(1000);
-        
-        std::cout << "Результаты (анализируем регистр b, кубиты 4-8):" << std::endl;
+
+        std::cout << "Результаты измерения:" << std::endl;
         for (size_t i = 0; i < results.size(); ++i) {
             if (results[i] > 0) {
-                // Извлекаем значение регистра b (сдвигаем результат вправо на b_start)
-                size_t b_val = (i >> b_start) & 0x1F; // 5 бит регистра b
-                size_t x_val = i & 0xF;               // 4 бита регистра x
-                size_t ctrl_val = (i >> control) & 1; // бит контроля
-                
+                size_t x_val = i & 0xF;               // Первые 4 бита
+                size_t aux_val = (i >> aux_start) & 0x1F; // Следующие 5 бит
+                size_t ctrl_val = (i >> control) & 1;
+
                 std::cout << "State |" << i << ">: "
                           << "Control=" << ctrl_val 
-                          << ", x=" << x_val 
-                          << ", b (Result)=" << b_val 
+                          << ", x (Result)=" << x_val 
+                          << ", aux (Should be 0)=" << aux_val 
                           << " [" << results[i] << " times]" << std::endl;
+                
+                // Проверка
+                if (x_val == 6 && aux_val == 0) {
+                    std::cout << "УСПЕХ: x перешел в 6, aux очищен!" << std::endl;
+                } else {
+                    std::cout << "ОШИБКА: Ожидалось x=6, aux=0" << std::endl;
+                }
             }
         }
 
     } catch (const char* e) {
         std::cerr << "Error: " << e << std::endl;
     }
-
     return 0;
 }

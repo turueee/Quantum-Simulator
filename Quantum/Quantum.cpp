@@ -235,6 +235,8 @@ Quantum &Quantum::SWAP(size_t first, size_t second)
     CNOT(second, {first});
     CNOT(first, {second});
     CNOT(second, {first});
+
+	return *this;
 }
 
 Quantum &Quantum::CSWAP(size_t first, size_t second, size_t controll)
@@ -242,6 +244,8 @@ Quantum &Quantum::CSWAP(size_t first, size_t second, size_t controll)
     CNOT(second, {first, controll});
     CNOT(first, {second, controll});
     CNOT(second, {first, controll});
+
+	return *this;
 }
 
 void Quantum::operation(const std::vector<std::complex<double>>& qop, size_t target, const std::vector<size_t>& controls)
@@ -470,26 +474,60 @@ Quantum &QuantumAlgorithms::CSub(Quantum &object, size_t first, size_t last, siz
 
 Quantum &QuantumAlgorithms::MulMod(Quantum &object, size_t first, size_t last, size_t xfirst, size_t xlast, size_t a, size_t N, size_t ancilla, size_t controll)
 {
-    if (last-first == xlast - xfirst)
-		throw;
-	size_t n = last - first + 1;
-	QFT(object, first, last);
-	for (size_t i = 0; i < n; ++i)
-	{
-		CAddMod(object, first, last, a * (1<<i), N, ancilla, {xfirst + i, controll});
-	}
-	IQFT(object, first, last);
-	return object;
+    size_t n = xlast - xfirst + 1;
+    QFT(object, first, last);
+    for (size_t i = 0; i < n; ++i)
+    {
+        size_t current_a = (static_cast<unsigned long long>(a) << i) % N;
+        CAddMod(object, first, last, current_a, N, ancilla, {xfirst + i, controll});
+    }
+    IQFT(object, first, last);
+    return object;
+}
+
+Quantum &QuantumAlgorithms::Ua_Gate(Quantum &object, size_t xfirst, size_t xlast, size_t afirst, size_t alast, size_t a, size_t N, size_t ancilla, size_t controll)
+{
+    size_t n = xlast - xfirst + 1;
+
+    MulMod(object, afirst, alast, xfirst, xlast, a, N, ancilla, controll);
+    СSWAP(object, xfirst, xlast, afirst, alast - 1, controll); 
+    size_t a_inv = modInverse(a, N);
+    MulMod(object, afirst, alast, xfirst, xlast, a_inv, N, ancilla, controll);
+    return object;
 }
 
 Quantum &QuantumAlgorithms::СSWAP(Quantum& object, size_t first, size_t last, size_t afirst, size_t alast, size_t controll)
 {
-    if (last-first == alast - afirst)
-		throw;
 	size_t n = last - first + 1;
 	for (size_t i = 0; i < n; ++i)
 	{
 		object.CSWAP(first + i, afirst + i, controll);
 	}
 	return object;
+}
+
+size_t QuantumAlgorithms::modInverse(size_t a, size_t N) 
+{
+    long long m0 = N, t, q;
+    long long x0 = 0, x1 = 1;
+
+    if (N == 1) return 0;
+
+    long long a_long = a % N;
+
+    while (a_long > 1) 
+	{
+        q = a_long / m0;
+        t = m0;
+
+        m0 = a_long % m0, a_long = t;
+        t = x0;
+
+        x0 = x1 - q * x0;
+        x1 = t;
+    }
+
+    if (x1 < 0) x1 += N;
+
+    return static_cast<size_t>((N - x1));
 }
