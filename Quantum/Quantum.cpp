@@ -273,7 +273,47 @@ void Quantum::operation(const std::vector<std::complex<double>>& qop, size_t tar
     }
 }
 
+int Quantum::MeasureAndReset(size_t qbit)
+{
+    double p0 = 0.0;
+    size_t mask = 1ULL << qbit;
 
+    for (size_t i = 0; i < qbits.size(); ++i) {
+        if ((i & mask) == 0) {
+            p0 += std::norm(qbits[i]);
+        }
+    }
+
+	static std::random_device rd;
+	static std::mt19937_64 gen(rd());
+	static std::uniform_real_distribution<double> dis(0.0, 1.0);
+
+	int result = (dis(gen) > p0) ? 1 : 0;
+
+    double norm_factor = std::sqrt(result == 0 ? p0 : (1.0 - p0));
+    if (norm_factor < 1e-15) norm_factor = 1e-15;
+
+    for (size_t i = 0; i < qbits.size(); ++i) {
+        if (((i & mask) >> qbit) == result) {
+            qbits[i] /= norm_factor;
+        } else {
+            qbits[i] = 0.0;
+        }
+    }
+    if (result == 1) 
+	{
+        for (size_t i = 0; i < qbits.size(); ++i) 
+		{
+            if ((i & mask) != 0) 
+			{
+                qbits[i & ~mask] = qbits[i];
+                qbits[i] = 0.0;
+            }
+        }
+    }
+
+    return result;
+}
 
 std::vector<int> Quantum::Measurment(size_t count_of_measurment)
 {
@@ -490,13 +530,13 @@ Quantum &QuantumAlgorithms::Ua_Gate(Quantum &object, size_t xfirst, size_t xlast
     size_t n = xlast - xfirst + 1;
 
     MulMod(object, afirst, alast, xfirst, xlast, a, N, ancilla, controll);
-    СSWAP(object, xfirst, xlast, afirst, alast - 1, controll); 
+    CSWAP(object, xfirst, xlast, afirst, alast - 1, controll); 
     size_t a_inv = modInverse(a, N);
     MulMod(object, afirst, alast, xfirst, xlast, a_inv, N, ancilla, controll);
     return object;
 }
 
-Quantum &QuantumAlgorithms::СSWAP(Quantum& object, size_t first, size_t last, size_t afirst, size_t alast, size_t controll)
+Quantum &QuantumAlgorithms::CSWAP(Quantum& object, size_t first, size_t last, size_t afirst, size_t alast, size_t controll)
 {
 	size_t n = last - first + 1;
 	for (size_t i = 0; i < n; ++i)
@@ -524,28 +564,120 @@ bool QuantumAlgorithms::ShorAlgorithmFirstPhase(size_t number)
 	return true;
 }
 
-bool QuantumAlgorithms::ShorAlgorithmSecondPhase(size_t number)
+std::pair<size_t, size_t> QuantumAlgorithms::ShorAlgorithmSecondPhase(size_t number)
 {
-
-	
-	std::random_device rd;
+    std::random_device rd;
     std::mt19937 gen(rd());
     std::uniform_int_distribution<size_t> dist(2, number - 1);
-	size_t a = dist(gen);
+    size_t a = dist(gen);
 
-	size_t g = std::gcd(a,number);
+    size_t g = std::gcd(a, number);
+    if (g > 1)
+        return {0, a}; 
 
-	if (g > 1)
-		return false;
-	
-	size_t n = 64 - __builtin_clzll(static_cast<uint64_t>(number));
-	Quantum object(3*n);
-	object.X(0);
-	for (size_t i = n; i < 3*n; ++i)
-		object.H(i);
+    size_t n = 64 - __builtin_clzll(static_cast<uint64_t>(number));
+    size_t total_qbits = 2 * n + 3;
+    Quantum object(total_qbits);
 
-	
-    return false;
+    size_t x_first = 0, x_last = n - 1;
+    size_t a_first = n, a_last = 2 * n;
+    size_t ancilla = 2 * n + 1;
+    size_t control = 2 * n + 2;
+
+    object.X(x_first);
+
+    std::vector<int> bits;
+    size_t precision = 2 * n; 
+
+    for (int k = precision - 1; k >= 0; --k) {
+        object.H(control);
+
+		std::cout << "    [Симулятор] Обработка кубита фазы " << k 
+                  << " из " << precision << "...\n";
+                  
+        object.H(control);
+
+        size_t power_a = modPow(a, 1ULL << k, number);
+        if (power_a != 1) {
+            Ua_Gate(object, x_first, x_last, a_first, a_last, power_a, number, ancilla, control);
+        }
+
+        double theta = 0.0;
+        for (size_t j = 0; j < bits.size(); ++j) {
+            if (bits[bits.size() - 1 - j] == 1) {
+                theta += std::acos(-1.0) / (1ULL << (j + 1));
+            }
+        }
+        if (theta > 0) object.P(control, -theta);
+        
+        object.H(control);
+        int m = object.MeasureAndReset(control);
+        bits.push_back(m);
+    }
+
+    size_t y = 0;
+    for (size_t i = 0; i < bits.size(); ++i) {
+        y |= (static_cast<size_t>(bits[i]) << i);
+    }
+    
+    size_t Q = 1ULL << precision;
+
+    size_t r = findPeriodFromMeasurement(y, Q, a, number);
+    
+    return {r, a};
+}
+
+size_t QuantumAlgorithms::modPow(size_t base, size_t exp, size_t mod) 
+{
+    size_t res = 1;
+    base %= mod;
+    while (exp > 0) 
+	{
+        if (exp % 2 == 1) 
+            res = static_cast<size_t>((static_cast<unsigned __int128>(res) * base) % mod);
+        base = static_cast<size_t>((static_cast<unsigned __int128>(base) * base) % mod);
+        exp /= 2;
+    }
+    return res;
+}
+
+size_t QuantumAlgorithms::findPeriodFromMeasurement(size_t y, size_t Q, size_t a, size_t N) 
+{
+    if (y == 0) return 0; 
+
+    std::vector<size_t> a_vals;
+    size_t num = y;
+    size_t den = Q;
+    
+    
+    for (int i = 0; i < 40; ++i) 
+	{ 
+        if (den == 0) break;
+        a_vals.push_back(num / den);
+        size_t rem = num % den;
+        num = den;
+        den = rem;
+    }
+    
+    size_t p_prev2 = 0, p_prev1 = 1;
+    size_t q_prev2 = 1, q_prev1 = 0;
+    
+    for (size_t a_i : a_vals) 
+	{
+        size_t p_curr = a_i * p_prev1 + p_prev2;
+        size_t q_curr = a_i * q_prev1 + q_prev2;
+        
+        if (q_curr > 0 && q_curr < N) 
+		{
+            if (modPow(a, q_curr, N) == 1) {
+                return q_curr;
+            }
+        }
+        p_prev2 = p_prev1; p_prev1 = p_curr;
+        q_prev2 = q_prev1; q_prev1 = q_curr;
+    }
+    
+    return 0;
 }
 
 size_t QuantumAlgorithms::modInverse(size_t a, size_t N) 

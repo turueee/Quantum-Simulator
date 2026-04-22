@@ -45,6 +45,7 @@ public:
 	Quantum& CSWAP(size_t first, size_t second, size_t controll);
 	void operation(const std::vector<std::complex<double>>& qop, size_t target, const std::vector<size_t>& controls);
 
+	int MeasureAndReset(size_t qbit);
 	std::vector<int> Measurment(size_t count_of_measurment);
 	
 
@@ -67,8 +68,11 @@ public:
 	static Quantum& CSub(Quantum& object, size_t first, size_t last, size_t num, std::vector<size_t> controll);
 	static Quantum& MulMod(Quantum& object, size_t first, size_t last, size_t xfirst, size_t xlast, size_t a, size_t N, size_t ancilla, size_t controll);
 	static Quantum& Ua_Gate(Quantum &object, size_t xfirst, size_t xlast, size_t afirst, size_t alast, size_t a, size_t N, size_t ancilla, size_t controll);
-	static Quantum& СSWAP(Quantum& object, size_t first, size_t last, size_t afirst, size_t alast, size_t controll);
+	static Quantum& CSWAP(Quantum& object, size_t first, size_t last, size_t afirst, size_t alast, size_t controll);
 	static bool ShorAlgorithm(size_t number);
 	static bool ShorAlgorithmFirstPhase(size_t number);
-	static bool ShorAlgorithmSecondPhase(size_t number);
+	static std::pair<size_t, size_t> ShorAlgorithmSecondPhase(size_t number);
+
+	static size_t modPow(size_t base, size_t exp, size_t mod);
+    static size_t findPeriodFromMeasurement(size_t y, size_t Q, size_t a, size_t N);
 };
