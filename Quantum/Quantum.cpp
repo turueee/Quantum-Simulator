@@ -546,87 +546,142 @@ Quantum &QuantumAlgorithms::CSWAP(Quantum& object, size_t first, size_t last, si
 	return object;
 }
 
-bool QuantumAlgorithms::ShorAlgorithm(size_t number)
+std::pair<size_t, size_t> QuantumAlgorithms::ShorAlgorithm(size_t number)
 {
-    return false;
+    auto stage1 = ShorAlgorithmFirstPhase(number);
+    if (stage1.first != 0)
+        return stage1;
+
+    while (true) 
+	{
+        auto stage2 = ShorAlgorithmSecondPhase(number);
+        size_t r = stage2.first;
+        size_t a = stage2.second;
+
+        auto stage3 = ShorAlgorithmThirdPhase(number, a, r);
+        
+        if (stage3.first != 0)
+            return stage3;
+    }
 }
 
-bool QuantumAlgorithms::ShorAlgorithmFirstPhase(size_t number)
+std::pair<size_t, size_t> QuantumAlgorithms::ShorAlgorithmFirstPhase(size_t number)
 {
 	if(number % 2 == 0)
-		return false;
+		return {2,number/2};
 	if(number % 3 == 0)
-		return false;
+		return {3, number/3};
 	if(number % 5 == 0)
-		return false;
+		return {5, number/5};
 	if(number % 7 == 0)
-		return false;
-	return true;
+		return {7, number/7};
+	return {0,0};
 }
 
-std::pair<size_t, size_t> QuantumAlgorithms::ShorAlgorithmSecondPhase(size_t number)
-{
+size_t QuantumAlgorithms::findPeriodByPeakDistance(const std::vector<int>& histogram, size_t Q) {
+    size_t peak1 = 0, peak2 = 0;
+    int val1 = 0, val2 = 0;
+
+    for (size_t i = 1; i < histogram.size(); ++i) {
+        if (histogram[i] > val1) {
+            val1 = histogram[i];
+            peak1 = i;
+        }
+    }
+    for (size_t i = 1; i < histogram.size(); ++i) {
+        if (std::abs((int)i - (int)peak1) > (int)(Q * 0.05)) { 
+            if (histogram[i] > val2) {
+                val2 = histogram[i];
+                peak2 = i;
+            }
+        }
+    }
+    if (val1 == 0 || val2 == 0) return 0;
+    size_t delta_y = (peak1 > peak2) ? (peak1 - peak2) : (peak2 - peak1);
+    return static_cast<size_t>(std::round(static_cast<double>(Q) / delta_y));
+}
+
+std::pair<size_t, size_t> QuantumAlgorithms::ShorAlgorithmSecondPhase(size_t number) {
     std::random_device rd;
     std::mt19937 gen(rd());
     std::uniform_int_distribution<size_t> dist(2, number - 1);
     size_t a = dist(gen);
 
     size_t g = std::gcd(a, number);
-    if (g > 1)
-        return {0, a}; 
+    if (g > 1) return {0, a};
 
     size_t n = 64 - __builtin_clzll(static_cast<uint64_t>(number));
-    size_t total_qbits = 2 * n + 3;
-    Quantum object(total_qbits);
-
-    size_t x_first = 0, x_last = n - 1;
-    size_t a_first = n, a_last = 2 * n;
-    size_t ancilla = 2 * n + 1;
-    size_t control = 2 * n + 2;
-
-    object.X(x_first);
-
-    std::vector<int> bits;
-    size_t precision = 2 * n; 
-
-    for (int k = precision - 1; k >= 0; --k) {
-        object.H(control);
-
-		std::cout << "    [Симулятор] Обработка кубита фазы " << k 
-                  << " из " << precision << "...\n";
-                  
-        object.H(control);
-
-        size_t power_a = modPow(a, 1ULL << k, number);
-        if (power_a != 1) {
-            Ua_Gate(object, x_first, x_last, a_first, a_last, power_a, number, ancilla, control);
-        }
-
-        double theta = 0.0;
-        for (size_t j = 0; j < bits.size(); ++j) {
-            if (bits[bits.size() - 1 - j] == 1) {
-                theta += std::acos(-1.0) / (1ULL << (j + 1));
-            }
-        }
-        if (theta > 0) object.P(control, -theta);
-        
-        object.H(control);
-        int m = object.MeasureAndReset(control);
-        bits.push_back(m);
-    }
-
-    size_t y = 0;
-    for (size_t i = 0; i < bits.size(); ++i) {
-        y |= (static_cast<size_t>(bits[i]) << i);
-    }
-    
+    size_t precision = 2 * n;
     size_t Q = 1ULL << precision;
 
-    size_t r = findPeriodFromMeasurement(y, Q, a, number);
-    
+    size_t total_qbits = precision + 2 * n + 2; 
+    Quantum object(total_qbits);
+
+    size_t c_first = 0;   
+    size_t x_first = precision;              
+    size_t x_last = precision + n - 1;
+    size_t a_first = precision + n;        
+    size_t a_last = precision + 2 * n;
+    size_t ancilla = precision + 2 * n + 1;
+
+    object.X(x_first); 
+
+    for (size_t i = 0; i < precision; ++i) {
+        object.H(c_first + i);
+    }
+
+    for (size_t k = 0; k < precision; ++k) {
+        size_t power_a = modPow(a, 1ULL << k, number);
+        if (power_a != 1) 
+		{
+            Ua_Gate(object, x_first, x_last, a_first, a_last, power_a, number, ancilla, c_first + k);
+        }
+    }
+
+    IQFT(object, c_first, c_first + precision - 1);
+	size_t shots = std::max((size_t)1000, Q / 4);
+    std::vector<int> samples = object.Measurment(shots);
+
+    std::vector<int> phase_histogram(Q, 0);
+    for (size_t i = 0; i < samples.size(); ++i) {
+        if (samples[i] > 0) {
+            size_t y = i & (Q - 1);
+            phase_histogram[y] += samples[i];
+        }
+    }
+
+    size_t r = findPeriodByPeakDistance(phase_histogram, Q);
+
     return {r, a};
 }
 
+std::pair<size_t, size_t> QuantumAlgorithms::ShorAlgorithmThirdPhase(size_t number, size_t a, size_t r) 
+{
+    if (r == 0) {
+        size_t g = std::gcd(a, number);
+        if (g > 1) return {g, number / g};
+        return {0, 0};
+    }
+
+    if (r % 2 != 0) 
+        return {0, 0};
+
+    size_t val = modPow(a, r / 2, number);
+
+    if (val == 1 || val == number - 1) {
+        return {0, 0};
+    }
+
+    size_t p = std::gcd(val - 1, number);
+    size_t q = std::gcd(val + 1, number);
+
+    if (p * q == number && p > 1) 
+	{
+        return {p, q};
+    }
+
+    return {0, 0};
+}
 size_t QuantumAlgorithms::modPow(size_t base, size_t exp, size_t mod) 
 {
     size_t res = 1;

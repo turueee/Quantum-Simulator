@@ -69,9 +69,11 @@ public:
 	static Quantum& MulMod(Quantum& object, size_t first, size_t last, size_t xfirst, size_t xlast, size_t a, size_t N, size_t ancilla, size_t controll);
 	static Quantum& Ua_Gate(Quantum &object, size_t xfirst, size_t xlast, size_t afirst, size_t alast, size_t a, size_t N, size_t ancilla, size_t controll);
 	static Quantum& CSWAP(Quantum& object, size_t first, size_t last, size_t afirst, size_t alast, size_t controll);
-	static bool ShorAlgorithm(size_t number);
-	static bool ShorAlgorithmFirstPhase(size_t number);
+	static std::pair<size_t, size_t> ShorAlgorithm(size_t number);
+	static std::pair<size_t, size_t> ShorAlgorithmFirstPhase(size_t number);
 	static std::pair<size_t, size_t> ShorAlgorithmSecondPhase(size_t number);
+	static std::pair<size_t, size_t> ShorAlgorithmThirdPhase(size_t number, size_t a, size_t r);
+	static size_t findPeriodByPeakDistance(const std::vector<int>& histogram, size_t Q);
 
 	static size_t modPow(size_t base, size_t exp, size_t mod);
     static size_t findPeriodFromMeasurement(size_t y, size_t Q, size_t a, size_t N);
