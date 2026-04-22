@@ -3,6 +3,10 @@
 #include <iostream>
 #include <vector>
 #include <complex>
+#include <bit>
+#include <cstdint>
+#include <numeric>
+#include <random>
 
 
 class Quantum
@@ -64,4 +68,7 @@ public:
 	static Quantum& MulMod(Quantum& object, size_t first, size_t last, size_t xfirst, size_t xlast, size_t a, size_t N, size_t ancilla, size_t controll);
 	static Quantum& Ua_Gate(Quantum &object, size_t xfirst, size_t xlast, size_t afirst, size_t alast, size_t a, size_t N, size_t ancilla, size_t controll);
 	static Quantum& СSWAP(Quantum& object, size_t first, size_t last, size_t afirst, size_t alast, size_t controll);
+	static bool ShorAlgorithm(size_t number);
+	static bool ShorAlgorithmFirstPhase(size_t number);
+	static bool ShorAlgorithmSecondPhase(size_t number);
 };

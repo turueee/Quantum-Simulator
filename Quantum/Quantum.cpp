@@ -506,6 +506,48 @@ Quantum &QuantumAlgorithms::СSWAP(Quantum& object, size_t first, size_t last, s
 	return object;
 }
 
+bool QuantumAlgorithms::ShorAlgorithm(size_t number)
+{
+    return false;
+}
+
+bool QuantumAlgorithms::ShorAlgorithmFirstPhase(size_t number)
+{
+	if(number % 2 == 0)
+		return false;
+	if(number % 3 == 0)
+		return false;
+	if(number % 5 == 0)
+		return false;
+	if(number % 7 == 0)
+		return false;
+	return true;
+}
+
+bool QuantumAlgorithms::ShorAlgorithmSecondPhase(size_t number)
+{
+
+	
+	std::random_device rd;
+    std::mt19937 gen(rd());
+    std::uniform_int_distribution<size_t> dist(2, number - 1);
+	size_t a = dist(gen);
+
+	size_t g = std::gcd(a,number);
+
+	if (g > 1)
+		return false;
+	
+	size_t n = 64 - __builtin_clzll(static_cast<uint64_t>(number));
+	Quantum object(3*n);
+	object.X(0);
+	for (size_t i = n; i < 3*n; ++i)
+		object.H(i);
+
+	
+    return false;
+}
+
 size_t QuantumAlgorithms::modInverse(size_t a, size_t N) 
 {
     long long m0 = N, t, q;

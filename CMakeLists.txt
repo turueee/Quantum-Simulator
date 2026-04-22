@@ -1,16 +1,13 @@
 cmake_minimum_required(VERSION 3.5)
 
-# Указываем, что это C++ проект (полезно для правильной настройки флагов)
 set(PROJECT_NAME QuantumSimulator)
 project(${PROJECT_NAME} CXX)
 
 # === НАСТРОЙКА ФЛАГОВ ДЛЯ RELEASE ===
-# Переопределяем стандартный -O3 на -O2
 if(CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
-    set(CMAKE_CXX_FLAGS_RELEASE "-O2 -DNDEBUG")
+    set(CMAKE_CXX_FLAGS_RELEASE "-O3 -march=native -DNDEBUG")
 elseif(MSVC)
-    # Для Visual Studio эквивалентом является /O2
-    set(CMAKE_CXX_FLAGS_RELEASE "/O2 /D NDEBUG")
+    set(CMAKE_CXX_FLAGS_RELEASE "/O2 /fp:fast /D NDEBUG")
 endif()
 # ====================================
 
