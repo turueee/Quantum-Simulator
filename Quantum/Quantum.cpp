@@ -253,10 +253,11 @@ void Quantum::operation(const std::vector<std::complex<double>>& qop, size_t tar
     size_t target_mask = (1ULL << target);
     
     size_t ctrl_mask = 0;
+    #pragma omp parallel for num_threads(7)
     for (size_t c : controls) {
         ctrl_mask |= (1ULL << c);
     }
-
+    #pragma omp parallel for num_threads(7)
     for (size_t i = 0; i < qbits.size(); ++i) 
 	{
         if (((i & ctrl_mask) == ctrl_mask) && ((i & target_mask) == 0)) 

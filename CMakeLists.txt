@@ -3,6 +3,8 @@ cmake_minimum_required(VERSION 3.5)
 set(PROJECT_NAME QuantumSimulator)
 project(${PROJECT_NAME} CXX)
 
+find_package(OpenMP REQUIRED)
+
 # === НАСТРОЙКА ФЛАГОВ ДЛЯ RELEASE ===
 if(CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
     set(CMAKE_CXX_FLAGS_RELEASE "-O3 -march=native -DNDEBUG")

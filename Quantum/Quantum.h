@@ -7,6 +7,7 @@
 #include <cstdint>
 #include <numeric>
 #include <random>
+#include <omp.h>
 
 
 class Quantum
