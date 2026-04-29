@@ -253,11 +253,10 @@ void Quantum::operation(const std::vector<std::complex<double>>& qop, size_t tar
     size_t target_mask = (1ULL << target);
     
     size_t ctrl_mask = 0;
-    #pragma omp parallel for num_threads(7)
     for (size_t c : controls) {
         ctrl_mask |= (1ULL << c);
     }
-    #pragma omp parallel for num_threads(7)
+    #pragma omp for
     for (size_t i = 0; i < qbits.size(); ++i) 
 	{
         if (((i & ctrl_mask) == ctrl_mask) && ((i & target_mask) == 0)) 
@@ -549,10 +548,6 @@ Quantum &QuantumAlgorithms::CSWAP(Quantum& object, size_t first, size_t last, si
 
 std::pair<size_t, size_t> QuantumAlgorithms::ShorAlgorithm(size_t number)
 {
-    auto stage1 = ShorAlgorithmFirstPhase(number);
-    if (stage1.first != 0)
-        return stage1;
-
     while (true) 
 	{
         auto stage2 = ShorAlgorithmSecondPhase(number);
@@ -615,40 +610,44 @@ std::pair<size_t, size_t> QuantumAlgorithms::ShorAlgorithmSecondPhase(size_t num
     size_t precision = 2 * n;
     size_t Q = 1ULL << precision;
 
-    size_t total_qbits = precision + 2 * n + 2; 
+    size_t total_qbits = 4 * n + 2; 
     Quantum object(total_qbits);
+    std::cout << "[QUANTUM_CORE] Инициализация квантового регистра на " << total_qbits << " кубитов." << std::endl;
 
     size_t c_first = 0;   
     size_t x_first = precision;              
     size_t x_last = precision + n - 1;
     size_t a_first = precision + n;        
-    size_t a_last = precision + 2 * n;
-    size_t ancilla = precision + 2 * n + 1;
-
+    size_t a_last = precision + 2 * n - 1;
+    size_t ancilla = precision + 2 * n;
     object.X(x_first); 
-
     for (size_t i = 0; i < precision; ++i) {
         object.H(c_first + i);
     }
-
     for (size_t k = 0; k < precision; ++k) {
         size_t power_a = modPow(a, 1ULL << k, number);
-        if (power_a != 1) 
-		{
+        if (power_a != 1) {
             Ua_Gate(object, x_first, x_last, a_first, a_last, power_a, number, ancilla, c_first + k);
         }
     }
 
     IQFT(object, c_first, c_first + precision - 1);
-	size_t shots = std::max((size_t)1000, Q / 4);
-    std::vector<int> samples = object.Measurment(shots);
+    std::cout << "[QUANTUM_CORE] Квантовая схема выполнена. Запуск измерения..." << std::endl;
 
+    size_t shots = std::max((size_t)1000, Q / 4);
+    std::vector<int> samples = object.Measurment(shots);
+    bool quantum_success = false;
     std::vector<int> phase_histogram(Q, 0);
     for (size_t i = 0; i < samples.size(); ++i) {
         if (samples[i] > 0) {
             size_t y = i & (Q - 1);
             phase_histogram[y] += samples[i];
+            quantum_success = true;
         }
+    }
+
+    if (quantum_success) {
+        std::cout << "[SUCCESS] Квантовая часть успешно выдала вероятностный результат." << std::endl;
     }
 
     size_t r = findPeriodByPeakDistance(phase_histogram, Q);
