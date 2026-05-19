@@ -1,51 +1,65 @@
+#include "Quantum.h"
 #include <iostream>
 #include <chrono>
-#include <numeric>
-#include "Quantum.h"
+#include <omp.h>
 
-/**
- * Тест полного алгоритма Шора.
- * Факторизация числа N = 15.
- * Требуемое количество кубитов: 4n + 2 = 4*4 + 2 = 18 кубитов.
- */
+// Вспомогательная функция для установки классического значения в регистр с помощью X-гейтов
+void SetRegisterValue(Quantum& q, size_t start_qbit, size_t end_qbit, size_t value) {
+    for (size_t i = 0; i <= (end_qbit - start_qbit); ++i) {
+        if ((value >> i) & 1) {
+            q.X(start_qbit + i);
+        }
+    }
+}
 
 int main() {
-    try {
-        // Число для факторизации
-        size_t N = 20;
-        
-        std::cout << "--- Запуск алгоритма Шора для N = " << N << " ---" << std::endl;
-        std::cout << "Ожидаемые делители: 7 и 9" << std::endl;
+    // Ограничиваем количество потоков до 6
+    omp_set_num_threads(6);
 
-        // Замер времени всего процесса
-        auto start = std::chrono::high_resolution_clock::now();
+    size_t total_qbits = 29;
+    
+    // Границы первого регистра (целевой, к которому прибавляем)
+    size_t target_first = 0;
+    size_t target_last = 13;
+    size_t target_value = 100;
 
-        // Вызов ShorAlgorithm из вашей библиотеки.
-        // Он внутри себя последовательно выполняет:
-        // 1. Проверку на четность/простоту (ShorAlgorithmFirstPhase)
-        // 2. Квантовый поиск периода r (ShorAlgorithmSecondPhase)
-        // 3. Классическое вычисление делителей через НОД (ShorAlgorithmThirdPhase)
-        std::pair<size_t, size_t> divisors = QuantumAlgorithms::ShorAlgorithm(N);
+    // Границы второго регистра (тот, который прибавляем)
+    size_t source_first = 14;
+    size_t source_last = 27;
+    size_t source_value = 42;
 
-        auto end = std::chrono::high_resolution_clock::now();
-        std::chrono::duration<double> diff = end - start;
+    size_t measurements_count = 1000;
 
-        if (divisors.first != 0 && divisors.second != 0) {
-            std::cout << ">>> УСПЕХ: Найдены делители: " << divisors.first 
-                      << " и " << divisors.second << std::endl;
-        } else {
-            std::cout << ">>> ОШИБКА: Алгоритм не смог найти делители за текущие итерации." << std::endl;
-        }
+    std::cout << "[INFO] Потоков OpenMP: " << omp_get_max_threads() << std::endl;
+    std::cout << "[INFO] Инициализация среды на " << total_qbits << " кубитов (~8.5 ГБ ОЗУ)...\n\n";
 
-        std::cout << "Общее время работы: " << diff.count() << " сек." << std::endl;
-
-    } catch (const std::exception& e) {
-        std::cerr << "Standard Error: " << e.what() << std::endl;
-    } catch (const char* e) {
-        std::cerr << "Error: " << e << std::endl;
-    } catch (...) {
-        std::cerr << "Критическая ошибка памяти (необходимо около 1 ГБ для 18 кубитов)!" << std::endl;
+    // ==========================================
+    // ТЕСТ 1: ЧИСТОЕ ВЫПОЛНЕНИЕ СЛОЖЕНИЯ РЕГИСТРОВ
+    // ==========================================
+    std::cout << "--- ТЕСТ 2: Выполнение + Измерение результата ---" << std::endl;
+    
+    Quantum q2(total_qbits);
+    
+    SetRegisterValue(q2, target_first, target_last, target_value);
+    SetRegisterValue(q2, source_first, source_last, source_value);
+    
+    auto start2 = std::chrono::high_resolution_clock::now();
+    
+    // Те же самые квантовые операции
+    {
+    QuantumAlgorithms::QFT(q2, target_first, target_last);
+    QuantumAlgorithms::Add(q2, target_first, target_last, source_first, source_last);
+    QuantumAlgorithms::IQFT(q2, target_first, target_last);
     }
+    
+    // Измерение
+    std::vector<int> result = q2.Measurment(measurements_count); 
+    
+    auto end2 = std::chrono::high_resolution_clock::now();
+    std::chrono::duration<double> diff2 = end2 - start2;
+    
+    std::cout << "Время (Гейты + вычисление распределения + " << measurements_count << " шотов): " 
+              << diff2.count() << " секунд\n" << std::endl;
 
     return 0;
 }

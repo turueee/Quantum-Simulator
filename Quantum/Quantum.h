@@ -8,6 +8,8 @@
 #include <numeric>
 #include <random>
 #include <omp.h>
+#include <bitset>
+#include <fstream>
 
 
 class Quantum

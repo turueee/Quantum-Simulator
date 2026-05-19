@@ -256,7 +256,7 @@ void Quantum::operation(const std::vector<std::complex<double>>& qop, size_t tar
     for (size_t c : controls) {
         ctrl_mask |= (1ULL << c);
     }
-    #pragma omp for
+    #pragma omp parallel for
     for (size_t i = 0; i < qbits.size(); ++i) 
 	{
         if (((i & ctrl_mask) == ctrl_mask) && ((i & target_mask) == 0)) 
@@ -344,7 +344,21 @@ std::vector<int> Quantum::Measurment(size_t count_of_measurment)
 		}
 	}
 
-	return result;
+// Открываем файл для записи
+    std::ofstream out("histogram.txt"); 
+    if (out.is_open()) 
+    {
+        for (int i = 0; i < result.size(); ++i) {
+            if (result[i]) {
+                // Пишем в файл вместо консоли
+                out << std::bitset<16>(i) << ' ' << result[i] << '\n';
+            }
+        }
+        out.close();
+        std::cout << "[INFO] Данные для гистограммы сохранены в файл 'histogram.txt'\n";
+    }
+
+    return result;
 }
 
 std::ostream& operator<<(std::ostream& out, const Quantum& other)
@@ -554,6 +568,8 @@ std::pair<size_t, size_t> QuantumAlgorithms::ShorAlgorithm(size_t number)
         size_t r = stage2.first;
         size_t a = stage2.second;
 
+        std::cout<< "r: " << r << " a: " << a;
+
         auto stage3 = ShorAlgorithmThirdPhase(number, a, r);
         
         if (stage3.first != 0)
@@ -575,26 +591,55 @@ std::pair<size_t, size_t> QuantumAlgorithms::ShorAlgorithmFirstPhase(size_t numb
 }
 
 size_t QuantumAlgorithms::findPeriodByPeakDistance(const std::vector<int>& histogram, size_t Q) {
-    size_t peak1 = 0, peak2 = 0;
-    int val1 = 0, val2 = 0;
-
-    for (size_t i = 1; i < histogram.size(); ++i) {
-        if (histogram[i] > val1) {
-            val1 = histogram[i];
-            peak1 = i;
+// 1. Ищем максимальную амплитуду (исключая индекс 0)
+    int max_val = 0;
+    for (size_t i = 1; i < Q; ++i) {
+        if (histogram[i] > max_val) {
+            max_val = histogram[i];
         }
     }
-    for (size_t i = 1; i < histogram.size(); ++i) {
-        if (std::abs((int)i - (int)peak1) > (int)(Q * 0.05)) { 
-            if (histogram[i] > val2) {
-                val2 = histogram[i];
-                peak2 = i;
+    if (max_val == 0) return 0;
+
+    // 2. Находим все значимые пики (амплитуда > 30% от максимальной)
+    std::vector<size_t> peaks;
+    int threshold = max_val * 0.3; // Порог отсечения шума
+
+    for (size_t i = 1; i < Q; ++i) {
+        if (histogram[i] > threshold) {
+            // Проверяем, что это локальный максимум (чтобы не брать 'склоны' одного пика)
+            bool is_local_max = true;
+            for (int j = -2; j <= 2; ++j) {
+                size_t neighbor_idx = (i + j + Q) % Q; // Зацикливаем края
+                if (neighbor_idx != i && neighbor_idx != 0 && histogram[neighbor_idx] > histogram[i]) {
+                    is_local_max = false;
+                    break;
+                }
+            }
+            // Если точка выше соседей - сохраняем её как найденный пик
+            if (is_local_max) {
+                peaks.push_back(i);
             }
         }
     }
-    if (val1 == 0 || val2 == 0) return 0;
-    size_t delta_y = (peak1 > peak2) ? (peak1 - peak2) : (peak2 - peak1);
-    return static_cast<size_t>(std::round(static_cast<double>(Q) / delta_y));
+
+    if (peaks.empty()) return 0;
+
+    // 3. Считаем среднее расстояние между соседними пиками
+    double avg_distance = 0;
+    if (peaks.size() == 1) {
+        // Если пик всего один, считаем расстояние от нуля до этого пика
+        avg_distance = static_cast<double>(peaks[0]);
+    } else {
+        // Если пиков несколько, считаем дистанцию между соседями
+        double total_dist = 0;
+        for (size_t i = 0; i < peaks.size() - 1; ++i) {
+            total_dist += (peaks[i + 1] - peaks[i]);
+        }
+        avg_distance = total_dist / (peaks.size() - 1);
+    }
+
+    // 4. Возвращаем период = Q / среднее_расстояние
+    return static_cast<size_t>(std::round(static_cast<double>(Q) / avg_distance));
 }
 
 std::pair<size_t, size_t> QuantumAlgorithms::ShorAlgorithmSecondPhase(size_t number) {
@@ -618,8 +663,8 @@ std::pair<size_t, size_t> QuantumAlgorithms::ShorAlgorithmSecondPhase(size_t num
     size_t x_first = precision;              
     size_t x_last = precision + n - 1;
     size_t a_first = precision + n;        
-    size_t a_last = precision + 2 * n - 1;
-    size_t ancilla = precision + 2 * n;
+    size_t a_last = precision + 2 * n;
+    size_t ancilla = precision + 2 * n + 1;
     object.X(x_first); 
     for (size_t i = 0; i < precision; ++i) {
         object.H(c_first + i);
@@ -635,7 +680,7 @@ std::pair<size_t, size_t> QuantumAlgorithms::ShorAlgorithmSecondPhase(size_t num
     std::cout << "[QUANTUM_CORE] Квантовая схема выполнена. Запуск измерения..." << std::endl;
 
     size_t shots = std::max((size_t)1000, Q / 4);
-    std::vector<int> samples = object.Measurment(shots);
+    std::vector<int> samples = object.Measurment(10000);
     bool quantum_success = false;
     std::vector<int> phase_histogram(Q, 0);
     for (size_t i = 0; i < samples.size(); ++i) {
@@ -646,42 +691,63 @@ std::pair<size_t, size_t> QuantumAlgorithms::ShorAlgorithmSecondPhase(size_t num
         }
     }
 
+
+
+    // 2. Используем вашу готовую функцию цепных дробей!
+
     if (quantum_success) {
         std::cout << "[SUCCESS] Квантовая часть успешно выдала вероятностный результат." << std::endl;
     }
 
+    // ВЫЗЫВАЕМ ВАШУ НОВУЮ ФУНКЦИЮ ПОИСКА РАССТОЯНИЯ МЕЖДУ ПИКАМИ:
     size_t r = findPeriodByPeakDistance(phase_histogram, Q);
 
     return {r, a};
 }
 
+
 std::pair<size_t, size_t> QuantumAlgorithms::ShorAlgorithmThirdPhase(size_t number, size_t a, size_t r) 
 {
+    // Если период найти не удалось, но a и number имеют общий делитель
     if (r == 0) {
         size_t g = std::gcd(a, number);
-        if (g > 1) return {g, number / g};
+        // Убрано ограничение g > 1, теперь вернет и {1, number}
+        if (g > 0 && number % g == 0) return {g, number / g};
         return {0, 0};
     }
 
+    // Алгоритм требует четного периода для применения разности квадратов
     if (r % 2 != 0) 
         return {0, 0};
 
     size_t val = modPow(a, r / 2, number);
 
-    if (val == 1 || val == number - 1) {
-        return {0, 0};
-    }
+    // ==========================================
+    // УБРАНА ЗАЩИТА ОТ ТРИВИАЛЬНЫХ КОРНЕЙ:
+    // Раньше тут было: if (val == 1 || val == number - 1) return {0, 0};
+    // Для простого числа 11 val всегда будет равно 10 (то есть number - 1).
+    // ==========================================
 
     size_t p = std::gcd(val - 1, number);
     size_t q = std::gcd(val + 1, number);
 
-    if (p * q == number && p > 1) 
-	{
+    // Убрано условие p > 1, чтобы разрешить 1 * number = number
+    if (p * q == number) 
+    {
         return {p, q};
+    }
+    
+    // Дополнительная страховка: если произведение не равно числу, но p или q являются делителями
+    if (p > 0 && number % p == 0) {
+        return {p, number / p};
+    }
+    if (q > 0 && number % q == 0) {
+        return {q, number / q};
     }
 
     return {0, 0};
 }
+
 size_t QuantumAlgorithms::modPow(size_t base, size_t exp, size_t mod) 
 {
     size_t res = 1;
